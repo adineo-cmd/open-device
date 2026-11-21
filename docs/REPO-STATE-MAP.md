@@ -15,7 +15,7 @@ work committed, a named delta remains; **NEW** = no committed deliverable.
 | Device package | 245 | NEW | `research/devices/` does not exist |
 | SoC package | 27 | PARTIAL | 5 per-SoC GPU result docs under `research/soc/`; `per-soc-method-plans.md` is the plan they derive from |
 | CPU/SoC core ID | 27 | NEW | none |
-| GPU core ID | 27 | PARTIAL | 5 per-SoC GPU docs under `research/soc/`: MSM8998, SM4375, SM7325, SM8250, SM8350; 22 SoCs remain |
+| GPU core ID | 27 | PARTIAL | 6 per-SoC GPU docs under `research/soc/`: MSM8998, SM4375, SM7250, SM7325, SM8250, SM8350; 21 SoCs remain |
 | Driver interface | 42 | PARTIAL | 10 FP6 interface docs under `research/qualcomm/docs/` |
 | Proprietary blob spec | 9 | PARTIAL | 6 families have committed format work |
 | Firmware fleet | 9 | PARTIAL | 3 families have committed fleet notes |
@@ -33,7 +33,7 @@ work committed, a named delta remains; **NEW** = no committed deliverable.
 | boot | `research/qualcomm/docs/bootchain-census.md` (FP6 inventory, AVB, RISC-V cores) | PARTIAL | no byte-level cross-device container spec, no parser |
 | bt | `research/fleet/qca-bt-format.md` (field-level spec, 29 devices), `research/fleet/patch-stream-structure.md`; parser `implementations/qca-bt/` (30 tests) | PARTIAL | signature/manifest semantics marked open; 24-byte vs vendor-extended header |
 | cdsp | `research/cdsp-fleet/container.md` (split-MDT container, `p_flags` decode, sibling-size invariant, 2 devices / V65+V66), `research/cdsp-fleet/census.md` (23 files, 64 devices, 586 md5); parser `implementations/cdsp-fleet/` (140 tests) | PARTIAL | certificate/hash-record semantics `[OPEN]`; `cdsp_dtb.*` series unverified by bytes; no disassembly |
-| gpu | `research/laptop/qualcomm-adreno-gmu.md`, `-gmu-content.md`, `-a650-fleet.md`, `research/fleet/gpu-bdwlan.md`, `research/soc/Qualcomm-*-gpu.md` (5 per-SoC: MSM8998, SM4375, SM7325, SM8250, SM8350); parsers `implementations/adreno650/` (4 tests), `adreno-fleet/` (62 tests) | PARTIAL | signature rules absent; no bdwlan GPU parser; 22 of 27 SoCs have no per-SoC GPU doc |
+| gpu | `research/laptop/qualcomm-adreno-gmu.md`, `-gmu-content.md`, `-a650-fleet.md`, `research/fleet/gpu-bdwlan.md`, `research/soc/Qualcomm-*-gpu.md` (6 per-SoC: MSM8998, SM4375, SM7250, SM7325, SM8250, SM8350); parsers `implementations/adreno650/` (4 tests), `adreno-fleet/` (62 tests) | PARTIAL | signature rules absent; no bdwlan GPU parser; 21 of 27 SoCs have no per-SoC GPU doc |
 | modem | `research/laptop/qualcomm-pil-manifest-family.md`, `research/fleet/pil-metadata-sweep.md`, `research/fleet/qdsp6sw-container.md`; parsers `implementations/pil-manifests/` (41 tests), `implementations/hexagon-qdsp6/` (47 tests) | PARTIAL | `qdsp6sw.mbn` (84,123,868 B) container + metadata + embedded QuRT XML decoded; CLADE payload bytes, `.clade.dict`/`.clade.comp` offsets, per-segment instruction decode still open |
 | other | `research/laptop/qualcomm-data-blob-fleet.md` (hrtf5c, dax_param); parser `implementations/data-blob-fleet/` (54 tests) | PARTIAL | rest of the "other" bucket |
 | tz | `research/fleet/dsp-tz-map.md` (QSEE ELF64 segment map, enchilada), `research/qualcomm/docs/trustzone-census.md` (FP6) | PARTIAL | cross-device spec, signature, `seg[10]` entropy 6.64 question |
