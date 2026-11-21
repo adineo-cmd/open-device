@@ -195,7 +195,10 @@ from the FP6 exemplar (which ran all four end-to-end, see
 - Census method: FP6 pipeline; two additions — (a) a **touch-IC
   census template** (file → vendor token NT36672C/FT3518/ILI7807S →
   panel vendor; type/size/hashes only), because touch is the family
-  mass here; (b) the BT census is the *Rome* flavor — the lab's QCA
+  mass here — **superseded 2026-11-21 (#2064):** the packages were
+  obtained and the containers are now parsed, not just hashed; see
+  `../fleet/other-touch.md` §5-§9. The "type/size/hashes only" ceiling
+  no longer applies to the 145 local files; (b) the BT census is the *Rome* flavor — the lab's QCA
   BT fleet doc (../laptop/qualcomm-qca-bt-fleet.md) plus the crbtfw
   branches of btqca.c.
 - Upstream-facing: upstream's docs have no 6xx-generation content at

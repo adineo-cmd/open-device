@@ -105,7 +105,12 @@ Adreno GMU) live in `blob-matrix/laptop/`; the device matrix is
   probe/download sequence, a530 GMU-less GPU firmware set (one RE pass
   frees the whole cluster's GPU story — a530_* 7 files).
 - Blocked: payload RE for the unpopulated devices (packages not on
-  this box).
+  this box). — **partly lifted 2026-11-21 (#2064):** touch-panel
+  packages are now on the box for 2 clusters (larry SM6375 ODM `tp/`,
+  131 files; mediatek GT9886, 14 files) and their containers are
+  parsed. The touch half of this line is answered in
+  `../research/fleet/other-touch.md`; the remaining families here
+  (modem/adsp/gpu) are still package-blocked.
 
 ## 4. SM6375 (Snapdragon 695) — the largest modern populated cluster
 
