@@ -138,13 +138,22 @@ already among the 24 builds #1694 derived the ladder from.
 
 ## 5. The 13-device census is now complete
 
-[F] The matrix has **65 Mali `gpu` rows across 13 Pixel devices**. Every one now has a
-note:
+[F] The matrix has **65 Mali `gpu` rows across 13 Pixel devices**. Every device now appears
+in at least one note:
 
 | group | devices | notes |
 |---|---|---|
 | GS201 | `panther`, `cheetah`, `lynx`, `felix`, `tangorpro` | #1676 (`lynx`), **this note** (`tangorpro`) |
 | G3/G4 | `shiba`, `husky`, `akita`, `tokay`, `tegu`, `caiman`, `comet`, `komodo` | #1676, #1694, #1712, #1730, #1748 |
+
+**Correction, 2026-11-21.** I first wrote *"Every one now has a note"*, which was wrong:
+`panther`, `cheetah` and `felix` had no note of their own at that point — they appeared only
+as rows inside #1676's quintet table. There are **seven** device-level notes for 13 devices,
+because the #1676 note analyses the whole GS201 quintet and the #1748 note the whole G3/G4
+octet. The statement is now true only because
+`docs/devices/google/Pixel_7/gpu.md` (#1658) added the last of the three, and that note is
+also what takes branch verification from 50/65 to **65/65** — a stronger claim than "has a
+note", which is why I am not resting §5 on the note count [F].
 
 [I] What the completed family shows, stated as narrowly as the evidence allows:
 
