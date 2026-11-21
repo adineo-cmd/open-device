@@ -754,19 +754,43 @@ derivable from the committed table; it is reported as a gap rather than estimate
 
 | devices carrying it | distinct contents |
 |---:|---:|
-| 1 | 1,127 |
-| 2 | 221 |
-| 3 | 151 |
-| 4 | 159 |
-| 5–7 | 56 |
-| 8 | 216 |
-| 10–14 | 26 |
-| 16, 21, 22 | 8 |
+| 1 | 1,147 |
+| 2 | 208 |
+| 3 | 147 |
+| 4 | 164 |
+| 5–7 | 60 |
+| 8 | 210 |
+| 10–14 | 28 |
 
-The rows sum to 1,964 — every distinct content is accounted for `[F]`. The single
-largest sharing group is **8 devices** (216 contents): the eight Mi 12 / Poco F5
-rows of §7. Contents shared by 16, 21 or 22 devices exist but are few (8 contents);
-the widest is carried by 22 of the 73 devices.
+The rows sum to 1,964 — every distinct content is accounted for `[F]`. The largest
+sharing group is **8 devices** (210 contents). The widest is carried by **14** of the
+73 devices (`f7eaf75345e3`, under two names: `bdwlan.202` and `bdwlanu.202`), and
+nothing is shared by more than 14.
+
+**This table is device counts, not row counts — and an earlier draft confused the
+two.** It published `1,127 / 221 / 151 / 159 / 56 / 216 / 26 / 8` under the same
+header, which are the *row* counts per content, and then concluded that contents
+were "shared by 16, 21 or 22 devices". Those figures are real but they count matrix
+**rows**, not devices: a content carried by 11 devices can occupy 22 rows when each
+device lists it under two filenames. So the old table was self-consistent (it summed
+to 1,964) yet wrong in every cell and wrong by 8 devices in its headline claim. Both
+views, correctly labelled:
+
+| group size | distinct contents by **devices** | by **rows** |
+|---:|---:|---:|
+| 1 | 1,147 | 1,127 |
+| 2 | 208 | 221 |
+| 3 | 147 | 151 |
+| 4 | 164 | 159 |
+| 5–7 | 60 | 56 |
+| 8 | 210 | 216 |
+| 10–14 | 28 | 26 |
+| 16, 21, 22 | **0** | 8 |
+| total | 1,964 | 1,964 |
+
+The gap between the columns *is* the duplicate-row defect of §7: 12 excess rows mean
+some devices list one content twice. A content in 22 rows across 11 devices is not
+evidence of 22 devices running it `[F]`.
 
 Half the family's bytes are duplicate copies. One RE pass over the 1,964 distinct
 contents covers all 73 devices — that is the leverage number for budgeting work
@@ -1356,7 +1380,49 @@ print('both',len(b&e),'b-only',len(b-e),'e-only',len(e-b),'neither',len(all-b-e)
 "
 ```
 
-**9.10 Shared content sets (§5 SoC note, §7)**
+**9.10 Shared content sets (§5 SoC note, §6, §7)**
+```sh
+python3 -I -c "
+import csv
+from collections import defaultdict,Counter
+M='upstream-contribution/blob-database/coverage-matrix.csv'
+rows=[r for r in csv.DictReader(open(M)) if r['blob_subfamily']=='wpss']
+bydev=defaultdict(set); byrow=Counter()
+for r in rows: bydev[r['md5_db']].add(r['device']); byrow[r['md5_db']]+=1
+dv=Counter(len(v) for v in bydev.values())
+rw=Counter(byrow.values())
+print('by DEVICES',dict(sorted(dv.items())))
+print('by ROWS   ',dict(sorted(rw.items())))
+print('max devices',max(dv),'max rows',max(rw))
+def buck(c,lo,hi): return sum(c[k] for k in range(lo,hi+1))
+for lo,hi,lab in ((1,1,'1'),(2,2,'2'),(3,3,'3'),(4,4,'4'),(5,7,'5-7'),(8,8,'8'),(10,14,'10-14'),(16,22,'16/21/22')):
+    print('%-8s devices %-5d rows %d'%(lab,buck(dv,lo,hi),buck(rw,lo,hi)))
+"
+```
+Output: by-device buckets `1,147 / 208 / 147 / 164 / 60 / 210 / 28 / 0`; by-row
+buckets `1,127 / 221 / 151 / 159 / 56 / 216 / 26 / 8`; `max devices 14`, `max rows 22`.
+
+**9.10a Per-device scale and the duplicate-row defect (§7)**
+```sh
+python3 -I -c "
+import csv
+from collections import defaultdict
+M='upstream-contribution/blob-database/coverage-matrix.csv'
+rows=[r for r in csv.DictReader(open(M)) if r['blob_subfamily']=='wpss']
+dev=defaultdict(lambda:[0,0])
+for r in rows: dev[r['device']][0]+=int(r['size_bytes']); dev[r['device']][1]+=1
+top=sorted(dev.items(),key=lambda kv:-kv[1][0])[:7]
+for d,(b,n) in top: print(d,b,n)
+seen=defaultdict(list)
+for r in rows: seen[(r['device'],r['filename'])].append(r['md5_db'])
+dup=sum(len(v)-1 for v in seen.values() if len(set(v))==1 and len(v)>1)
+con=sum(1 for v in seen.values() if len(set(v))>1)
+print('exact-md5 repeat rows',dup,'same-name conflicts',con)
+"
+```
+Output: FP5 19,215,739/206 · Edge_30_Fusion 11,855,008/198 · Phone_2 11,639,824/194 ·
+FP6 11,581,906/72 · Nord_4 11,095,209/64 · Nord_CE4 10,967,929/62 · Moto_G200
+10,955,996/183; then `exact-md5 repeat rows 8`, `same-name conflicts 4`.
 ```sh
 python3 -I -c "
 import csv
