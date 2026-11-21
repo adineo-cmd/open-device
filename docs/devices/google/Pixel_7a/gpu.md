@@ -473,13 +473,22 @@ products; the argument rests on the firmware partition plus the internal contrad
 5. **I did not run the driver or read a GPU ID register.** The arch→marketing-name
    table (§3.3) is quoted from upstream, not applied to a Pixel. Mapping `lynx` to a
    specific Mali model would require reading `GPU_ID` on hardware [N].
-6. **Only `lynx` and `caiman` were verified against lineage-23.0.** The other 11
-   devices' matrix rows were not individually re-hashed, so "the matrix is a
-   lineage-23.0 snapshot" is proven for 10 rows and extrapolated to 65 [I].
+6. **~~Only `lynx` and `caiman` were verified against lineage-23.0~~** — **the G3/G4 half
+   is now fully measured, 2026-11-21.** All 8 G3/G4 devices × 5 files = **40/40** verified
+   against lineage-23.0 with none missing, and all 8 carry **one** identical signature
+   (`27c9b2b9 10d86c50 f34ea071 02e26e69 23cdc2df`). See
+   `docs/devices/google/Pixel_9_Pro_XL/gpu.md` §2. The **GS201** quintet's 25 rows are
+   still only extrapolated from `lynx`'s 5, so the statement "the matrix is a lineage-23.0
+   snapshot" is now proven for 45 of 65 rows, not 10 [F/I].
 7. **`legacy-r56p0`'s role is inferred from its name and presence pattern.** I did not
    confirm the driver ever falls back to it [I, OPEN].
-8. **I did not check whether the matrix's `Pixel_9A`/`Pixel_9_Pro_XL` blank SoC is a
-   parse failure or a genuinely empty source field** [N].
+8. **~~I did not check whether the matrix's `Pixel_9A`/`Pixel_9_Pro_XL` blank SoC is a
+   parse failure or a genuinely empty source field~~** — **answered 2026-11-21, see
+   `docs/devices/google/Pixel_9_Pro_XL/gpu.md` §3.1.** It is upstream absence, not a parse
+   failure: `device-inventory.csv` records the provenance in a `soc_source` column, both
+   devices carry `in_builds_csv = n`, and **no device anywhere has a populated
+   `soc_source` with a blank `soc`** (0 of 249). The blank is honest, and the schema that
+   records it already exists [F].
 9. **I did not trace where `interface_documented` gets its value**, so my explanation
    in §5.5 for *why* it says `n` is a guess. What is verified is only that the value is
    wrong [I].
@@ -489,6 +498,14 @@ products; the argument rests on the firmware partition plus the internal contrad
 1. **`coverage-matrix.csv` needs a `source_ref` column** (branch or release tag).
    Without it a row is undateable and unverifiable — demonstrated by my own failed
    first check (§5.4). Highest-value fix in this note.
+
+   **Partial correction, 2026-11-21:** I wrote that the database had no provenance
+   column. That is true of `coverage-matrix.csv` only. **`device-inventory.csv` already
+   has `soc_source`, `source_artifacts` and `mainline_basis_or_note`**, and `soc_source`
+   is stamped consistently (0 of 249 devices have a populated `soc_source` with a blank
+   `soc`). So the fix is not to invent a provenance scheme but to extend the one the
+   inventory already uses to the matrix. See
+   `docs/devices/google/Pixel_9_Pro_XL/gpu.md` §3.1 and §6.2 [F].
 2. **`docs/REPO-STATE-MAP.md:18`** currently reads "GPU core ID | 27 | PARTIAL | 5
    per-SoC GPU docs under `research/soc/`: MSM8998, SM4375, SM7325, SM8250, SM8350;
    22 SoCs remain". **It is no longer accurate in the way it reads.** "PARTIAL" now
