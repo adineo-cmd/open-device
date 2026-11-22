@@ -118,13 +118,30 @@ builds — 340, 10,300, 4,096 and 266,684 are build-invariant sizes `[F]`. (The 
 13-phdr devices are not index-comparable to a 9-phdr build and are covered
 separately in §2.5.)
 
-**Phone_1 matches `sc7280`, not `qcm6490`** — 6 exact indices including the
-1,176,368 B `b07`, where every other device matches neither. That is consistent
-with the matrix: Phone_1 is `SM7325-AE` (Snapdragon 778G+), the same family as the
-sc7280 reference. And FP5 (`QCM6490`) matches `qcm6490` at `b05` (118,588 exactly),
-which no other device does. So the `b<NN> ≡ phdr NN` identity holds
-*device-to-its-own-build*; the residual mismatches are build differences, not
-index drift `[F]`.
+**Phone_1 matches `sc7280` most closely** — 6 exact indices including the
+1,176,368 B `b07`, where every other device matches neither. And FP5 (`QCM6490`)
+matches `qcm6490` at `b05` (118,588 exactly), which no other device does. So the
+`b<NN> ≡ phdr NN` identity holds *device-to-its-own-build*; the residual mismatches
+are build differences, not index drift `[F]`.
+
+**The matrix's `soc` column does not predict which reference build matches, and an
+earlier draft claimed it did.** That draft explained Phone_1's 6/8 as "consistent
+with the matrix: Phone_1 is `SM7325-AE`, the same family as the sc7280 reference".
+But `Edge_30` carries the *identical* part — `Qualcomm SM7325-AE Snapdragon 778G
+5G` against Phone_1's `Qualcomm SM7325-AE Snapdragon 778G+ 5G`, same `SM7325-AE` —
+and scores **4/8**, not 6/8:
+
+| device | `soc` | vs `sc7280` | misses |
+|---|---|---:|---|
+| Phone_1 | SM7325-AE (778G+) | 6/8 | 4, 5 |
+| Edge_30 | SM7325-AE (778G) | 4/8 | 1, 4, 5, 7 |
+| FP5 | QCM6490 | 5/8 | 4, 5, 7 |
+
+Two devices on one part number land on different scores, and both miss indices 4
+and 5, so the discriminator is the individual firmware build, not the SoC. The one
+SoC-linked signal that does survive is narrow: FP5 is the only `QCM6490` device and
+the only one matching `qcm6490` at `b05`. Which reference each device was built from
+is **not** recoverable from the committed columns `[N]`.
 
 ### 2.3 The `b` count equals the number of non-empty program headers `[F]`
 
@@ -1343,14 +1360,20 @@ def phrs(fn):
     d=open(fn,'rb').read()
     phoff=struct.unpack_from('<I',d,28)[0]; pn=struct.unpack_from('<H',d,44)[0]
     return [struct.unpack_from('<IIIIIIII',d,phoff+i*32)[4] for i in range(pn)]
+soc={}
+for r in rows: soc.setdefault(r['device'],r['soc'])
 for fn,nm in (('wpss_sc7280.mbn','sc7280'),('wpss_qcm6490.mbn','qcm6490')):
     ref=phrs(fn)
     for d in ('Edge_30','FP5','Phone_1'):
         hits=[i for i in range(len(ref)) if ref[i] and by[d].get('b%02d'%i)==ref[i]]
-        print('%-8s vs %-7s %d/%d exact at %s'%(d,nm,len(hits),sum(1 for x in ref if x),hits))
+        miss=[i for i in range(len(ref)) if ref[i] and by[d].get('b%02d'%i)!=ref[i]]
+        print('%-8s vs %-7s %d/%d exact at %s miss %s  soc=%r'%(
+            d,nm,len(hits),sum(1 for x in ref if x),hits,miss,soc[d]))
 "
 ```
 Output: `sc7280` → 4, 5, 6 exact for Edge_30/FP5/Phone_1; `qcm6490` → 4, 5, 4.
+The `soc` column shows Edge_30 and Phone_1 on the **same** `SM7325-AE` part with
+different scores (4/8 vs 6/8), which is why the SoC does not explain the match.
 
 **9.5c The 13-phdr payload sequence and the FP6 / Nord_4 distinction (§2.5, §2.5a)**
 ```sh
