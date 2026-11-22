@@ -47,8 +47,8 @@ looked at one family at a time.
 
 [F] 2 rows, 413,696 B, 2 distinct md5, both 4096-aligned, both
 `db_path = google/shiba/radio`, `interface_documented = n`, `isa_identified` empty,
-`sha256_if_listed` empty. `priority` is **`P2` for `gsa.img` and `P3` for `gsa_bl1.img`** —
-the two rows do not share a priority.
+`sha256_if_listed` empty, and **both `priority = P3`** — the same priority, unlike the
+`P2`/`P3` split I first claimed here (see §7.6, corrected).
 
 [F] `Pixel_8` has 52 matrix rows in total. The `tz` family is 2 of them.
 
@@ -207,10 +207,12 @@ found for the boot firmware (12/12) and #1670 found for `gsa`.
 4. **`sha256_if_listed` is empty on both rows** while the vendor tree publishes a sha256 in
    its LFS pointer — free to harvest, as §3 demonstrates on 8 devices.
 5. **`interface_documented = n`** on both rows; `gsa_bl1.img` is a standard stage-1 loader.
-6. **`priority = P3` on `gsa_bl1.img` and `gcf.img`** while every other firmware file on this
-   device is `P2` (`abl`, `bl1`, `bl31`, `bl2`, `ldfw`, `pbl`, `tzsw`, and `gsa.img` itself).
-   The two smallest security-chip images are ranked *below* the loaders they authenticate,
-   and below their own sibling [OPEN].
+6. **`priority = P3` on all ten files here, including both `tz` rows.** I first wrote that
+   `gsa_bl1.img` and `gcf.img` were `P3` while the rest were `P2` — that was wrong. On
+   `Pixel_8` every one of the ten is `P3`. The real pattern is across devices, not files:
+   `gsa.img` is `P2` on the GS101 trio and `Pixel_7`, and `P3` on the other twelve devices.
+   I had read the globally-first row per filename (which happened to be `Pixel_6`, `P2`)
+   instead of this device's row. Corrected; see #1760 §7.2 [OPEN].
 
 ## 8. Reproduce
 
