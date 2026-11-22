@@ -206,12 +206,13 @@ entry. That is exactly the `b07`/`b08` assignment above, so the table's FP6 colu
 is `[F]`.
 
 For `Nord_4` and `Nord_CE4` the same two rows remain an inference from ordinal
-position in the payload sequence (§2.5a) — their aligned sequence matches FP6's one
-for one, which is strong `[I]` but not a measurement, because no `wpss.bNN` payload
-from those two devices was available to open `[N]`. Note also that `census.md`'s FP6
-sizes differ from the matrix's for `b06`, `b07`, `b09`, `b10` and `qdb` — a
-different build of the same tree — so only the *role* transfers across sources, not
-the sizes.
+position in the payload sequence (§2.5a) — their *role* ordering matches FP6's, which
+is strong `[I]` but not a measurement, because no `wpss.bNN` payload from those two
+devices was available to open `[N]`. Their *sizes* do not match FP6's: `Nord_4`
+differs at five indices (§2.5a), so only the role ordering transfers, not the bytes.
+Note also that `census.md`'s FP6 sizes differ from the matrix's for `b06`, `b07`,
+`b09`, `b10` and `qdb` — a different build of the same tree — so again only the
+*role* transfers across sources, not the sizes.
 
 The 13-phdr generation also introduces segment sizes the 9-phdr generation lacks —
 256 B, 468 B (its `b00`), 1,104 B, 4,376/6,440 B (its hash), and a 275,644 B M3-class
@@ -227,17 +228,31 @@ by exactly one index, because the hash block is inserted at a different point:
 
 | | b00 | b01 | b02 | b03 | b04 | b05 | b06 | b07 | b08 | b09 | b10 | b11 | b12 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| FP6 / Nord_4 | 468 | 6440 | 461049 | 1104 | 256 | 4096 | 6067704 | 118588 | 275644 | 356840 | 907982 | **∅** | **4376** |
+| FP6 | 468 | 6440 | 461049 | 1104 | 256 | 4096 | 6067704 | 118588 | 275644 | 356840 | 907982 | **∅** | **4376** |
+| Nord_4 | 468 | 6440 | 460985 | 1104 | 256 | 4096 | 6065678 | 118420 | 275644 | 348664 | 906086 | **∅** | **4376** |
 | Nord_CE4 | 468 | **4376** | 6440 | 461049 | 1104 | 256 | 4096 | 6060574 | 118420 | 275644 | 344520 | 905942 | **∅** |
 
 Read across: `CE4 b02..b06 ≡ FP6 b01..b05` (6440, 461049, 1104, 256, 4096 — all five
 identical), `CE4 b09 ≡ FP6 b08` (275644, identical), and `CE4 b01 ≡ FP6 b12` (4376,
-identical). Seven of eleven aligned sizes match exactly, which is far beyond chance on
-values this large. The four that differ (`b07`, `b08`, `b10`, `b11` on CE4) are the
-main body, the RISC-V-class body and the two large trailing bodies — the ones that
-carry product-specific firmware `[I]`. The zero-`p_filesz` phdr and the hash phdr
-**swap positions**: on FP6/Nord_4 the gap is 11 and the hash is 12; on Nord_CE4 the
-hash is 1 and the gap is 12 `[F]`.
+identical). Seven of seven aligned sizes match against **FP6**, which is far beyond
+chance on values this large. The four that differ are `b07`, `b08`, `b10`, `b11` on
+CE4 — the main body, the RISC-V-class body and the two large trailing bodies, i.e.
+the ones that carry product-specific firmware `[I]`. (A fifth index differs under
+the one-off alignment — `CE4 b01` against `FP6 b00` — but that is the hash block
+compared against the ELF header, not a payload slot, so it is the displacement
+itself rather than a mismatch.)
+
+**Nord_4 is not interchangeable with FP6, and an earlier draft's single
+"FP6 / Nord_4" row implied it was.** They differ at five indices (`b02` 460,985 vs
+461,049; `b06`; `b07` 118,420 vs 118,588; `b09` 348,664 vs 356,840; `b10`), so the
+aligned law holds **7/7 against FP6 but only 6/7 against Nord_4** — `CE4 b03` (1,104)
+does not equal `Nord_4 b02` (460,985). The law is about the *shape* of the
+displacement, not about two devices sharing one byte-for-byte row: the role
+assignments are identical across all three, the payload sizes are not. Sizes below
+are per-device, not per-generation `[F]`.
+
+The zero-`p_filesz` phdr and the hash phdr **swap positions**: on FP6/Nord_4 the gap
+is 11 and the hash is 12; on Nord_CE4 the hash is 1 and the gap is 12 `[F]`.
 
 **Why this matters for a reassembler.** `b<NN> ≡ phdr NN` means a size-comparison
 reassembler that matches segments *by index* across devices mis-aligns every
@@ -1247,6 +1262,34 @@ while pos+8<=len(d):
 ```
 Output: boards 1–7 and 255 → 33 tags, last `(33,596)`, tail 0; boards 9 and 10 →
 34 tags, last `(34,582)`; board 25 → 33 tags, last `(33,10)`, tail 586.
+
+**9.5c The 13-phdr payload sequence and the FP6 / Nord_4 distinction (§2.5, §2.5a)**
+```sh
+python3 -I -c "
+import csv,re
+from collections import defaultdict
+M='upstream-contribution/blob-database/coverage-matrix.csv'
+rows=[r for r in csv.DictReader(open(M)) if r['blob_subfamily']=='wpss' and r['filename'].startswith('wpss.')]
+by=defaultdict(dict)
+for r in rows:
+    m=re.match(r'^wpss\.(b[0-9a-f]{2})\$',r['filename'])
+    if m: by[r['device']][m.group(1)]=int(r['size_bytes'])
+for d in ('FP6','Nord_4','Nord_CE4'):
+    print('%-9s'%d,[by[d].get('b%02d'%i) for i in range(13)])
+def law(ref,ce4):
+    a=[ce4.get('b%02d'%i) for i in range(2,7)]; b=[ref.get('b%02d'%i) for i in range(1,6)]
+    m=sum(1 for x,y in zip(a,b) if x==y)
+    m+=1 if ce4.get('b09')==ref.get('b08') else 0
+    m+=1 if ce4.get('b01')==ref.get('b12') else 0
+    return m,a==b
+for nm in ('FP6','Nord_4'):
+    m,all5=law(by[nm],by['Nord_CE4'])
+    print('CE4 vs %-7s aligned law %d/7  b02..b06 all equal: %s'%(nm,m,all5))
+print('FP6 vs Nord_4 differing indices:',[i for i in range(13) if by['FP6'].get('b%02d'%i)!=by['Nord_4'].get('b%02d'%i)])
+"
+```
+Output: `CE4 vs FP6 aligned law 7/7`, `CE4 vs Nord_4 aligned law 6/7`,
+`FP6 vs Nord_4 differing indices: [2, 6, 7, 9, 10]`.
 
 **9.5b Which build each device matches (§2.2)**
 ```sh
