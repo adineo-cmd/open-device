@@ -1291,6 +1291,7 @@ for fn,nm in (('wpss_sc7280.mbn','sc7280'),('wpss_qcm6490.mbn','qcm6490')):
 "
 ```
 Output: `sc7280` → 4, 5, 6 exact for Edge_30/FP5/Phone_1; `qcm6490` → 4, 5, 4.
+
 **9.5c The 13-phdr payload sequence and the FP6 / Nord_4 distinction (§2.5, §2.5a)**
 ```sh
 python3 -I -c "
