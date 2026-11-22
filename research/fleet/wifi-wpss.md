@@ -592,9 +592,11 @@ caprip cebu corfup corfuq corfur cypfg cypfq denver devon fogo fogor fogos guam
 guamna guamp hawao ibiza miami milanf penang pnangn rhode rhodei rhodep`.
 
 `milanf` appears on **six** devices — `Edge_30_Neo`, `Moto_G34_5G`, `Moto_G82_5G`,
-`Moto_G84_5G`, `G_Stylus_5G-2-2022`, `Moto_G_5G_2024` — which span **two** SoCs,
-SM6375 (Snapdragon 695) and SM4375 (Snapdragon 4 Gen 1), always as the same
-`_epa`/`_ipa` pair. So the token tracks neither the phone nor the SoC
+`Moto_G84_5G`, `G_Stylus_5G-2-2022`, `Moto_G_5G_2024` — always as the same
+`_epa`/`_ipa` pair. Of the six, four are SM6375 (Snapdragon 695) and one is SM4375
+(Snapdragon 4 Gen 1); `G_Stylus_5G-2-2022` has an empty `soc` in the matrix, so the
+token's SoC span is **two populated parts, with one device unattributed** — not a
+clean two-SoC set `[F]`. So the token tracks neither the phone nor the SoC
 generation `[F]`; it most plausibly names the WiFi module itself `[I]`. (An earlier
 draft claimed `milanf` was on `Moto_G200`/SM8350-AC — that device carries no
 `milanf` file; corrected by re-measuring `[F]`.)
