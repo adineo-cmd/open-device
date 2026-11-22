@@ -1263,6 +1263,27 @@ while pos+8<=len(d):
 Output: boards 1–7 and 255 → 33 tags, last `(33,596)`, tail 0; boards 9 and 10 →
 34 tags, last `(34,582)`; board 25 → 33 tags, last `(33,10)`, tail 586.
 
+**9.5b Which build each device matches (§2.2)**
+```sh
+python3 -I -c "
+import csv,struct
+from collections import defaultdict
+M='upstream-contribution/blob-database/coverage-matrix.csv'
+rows=[r for r in csv.DictReader(open(M)) if r['blob_subfamily']=='wpss' and r['filename'].startswith('wpss.')]
+by=defaultdict(dict)
+for r in rows: by[r['device']][r['filename'][5:]]=int(r['size_bytes'])
+def phrs(fn):
+    d=open(fn,'rb').read()
+    phoff=struct.unpack_from('<I',d,28)[0]; pn=struct.unpack_from('<H',d,44)[0]
+    return [struct.unpack_from('<IIIIIIII',d,phoff+i*32)[4] for i in range(pn)]
+for fn,nm in (('wpss_sc7280.mbn','sc7280'),('wpss_qcm6490.mbn','qcm6490')):
+    ref=phrs(fn)
+    for d in ('Edge_30','FP5','Phone_1'):
+        hits=[i for i in range(len(ref)) if ref[i] and by[d].get('b%02d'%i)==ref[i]]
+        print('%-8s vs %-7s %d/%d exact at %s'%(d,nm,len(hits),sum(1 for x in ref if x),hits))
+"
+```
+Output: `sc7280` → 4, 5, 6 exact for Edge_30/FP5/Phone_1; `qcm6490` → 4, 5, 4.
 **9.5c The 13-phdr payload sequence and the FP6 / Nord_4 distinction (§2.5, §2.5a)**
 ```sh
 python3 -I -c "
@@ -1291,27 +1312,6 @@ print('FP6 vs Nord_4 differing indices:',[i for i in range(13) if by['FP6'].get(
 Output: `CE4 vs FP6 aligned law 7/7`, `CE4 vs Nord_4 aligned law 6/7`,
 `FP6 vs Nord_4 differing indices: [2, 6, 7, 9, 10]`.
 
-**9.5b Which build each device matches (§2.2)**
-```sh
-python3 -I -c "
-import csv,struct
-from collections import defaultdict
-M='upstream-contribution/blob-database/coverage-matrix.csv'
-rows=[r for r in csv.DictReader(open(M)) if r['blob_subfamily']=='wpss' and r['filename'].startswith('wpss.')]
-by=defaultdict(dict)
-for r in rows: by[r['device']][r['filename'][5:]]=int(r['size_bytes'])
-def phrs(fn):
-    d=open(fn,'rb').read()
-    phoff=struct.unpack_from('<I',d,28)[0]; pn=struct.unpack_from('<H',d,44)[0]
-    return [struct.unpack_from('<IIIIIIII',d,phoff+i*32)[4] for i in range(pn)]
-for fn,nm in (('wpss_sc7280.mbn','sc7280'),('wpss_qcm6490.mbn','qcm6490')):
-    ref=phrs(fn)
-    for d in ('Edge_30','FP5','Phone_1'):
-        hits=[i for i in range(len(ref)) if ref[i] and by[d].get('b%02d'%i)==ref[i]]
-        print('%-8s vs %-7s %d/%d exact at %s'%(d,nm,len(hits),sum(1 for x in ref if x),hits))
-"
-```
-Output: `sc7280` → 4, 5, 6 exact for Edge_30/FP5/Phone_1; `qcm6490` → 4, 5, 4.
 **9.6 Upstream `board-2.bin` bodies vs matrix `b` sizes (§3.2)**
 ```sh
 for f in ath10k/WCN3990/hw1.0/board-2.bin ath11k/WCN6750/hw1.0/board-2.bin ath11k/WCN6855/hw2.0/board-2.bin; do
