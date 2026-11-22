@@ -21,6 +21,17 @@ Evidence classes: **[F]** fact (command output) / **[I]** inference / **[H]** hy
   (#1688) — the `tz` family as a secure-world catch-all, and `blob_family` as a role label.
 - [`Poco_12C/boot.md`](https://github.com/adineo-cmd/open-device/blob/feat/open-device-site/docs/devices/xiaomi/Poco_12C/boot.md)
   (#1772) — this device's 18 rows and the MTK file set.
+- [`research/laptop/fragmentation-half.md`](https://github.com/adineo-cmd/open-device/blob/feat/open-device-site/research/laptop/fragmentation-half.md)
+  `:55-58` — **already identifies both MTK devices by name**, notes both carry a blank `soc`,
+  and calls the recorded-SoC subset "consistent under-representation" (28/118 vs ~124/246).
+  My "MTK is 2 of 123" framing is a restatement of this, not a discovery; the delta is that I
+  count the fleet at 123 rather than the half at 118 and connect it to `README.md:78`.
+- [`research/laptop/sharing-clusters.csv`](https://github.com/adineo-cmd/open-device/blob/feat/open-device-site/research/laptop/sharing-clusters.csv)
+  — the generated md5-cluster dump. It **does** record both `mt6631_fm_v1` rows at
+  `device_count = 2, devices = earth;rosemary`, so the bare fact of §5's shared pair was
+  already on disk. It carries no narrative and no `1a_1`/`2a_1` token column, which is where
+  the actual delta lives. I initially wrote that it did *not* record this; that was wrong and
+  is corrected here.
 - [`research/fleet/other-fingerprint.md`](https://github.com/adineo-cmd/open-device/blob/feat/open-device-site/research/fleet/other-fingerprint.md)
   `:152-153` — `fpctzapp` is the **FPC fingerprint TZ app**, not TrustZone firmware. This
   matters below: the string `tz` appears in filenames that are not secure-world images.
