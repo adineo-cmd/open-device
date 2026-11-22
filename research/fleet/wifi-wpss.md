@@ -736,9 +736,33 @@ Separately, `Nord_CE3`'s `soc` value carries a spurious leading `U+00FF` byte on
 device in the matrix with a non-ASCII `soc` field. Recorded here rather than
 silently normalised `[F]`.
 
-**Honest negative `[N]`:** 29 of 73 devices have an empty `soc` column — **all 13
-Xiaomi devices**, plus `FP6`, `Nord_4` and `Nord_CE4`. No complete SoC histogram is
-derivable from the committed table; it is reported as a gap rather than estimated.
+**Honest negative `[N]`:** 29 of 73 devices have an empty `soc` column. The
+enumeration matters more than the count, because an earlier draft listed only
+"all 13 Xiaomi devices, plus `FP6`, `Nord_4` and `Nord_CE4`" — that is 16 devices,
+not 29, and it silently omitted 13. The complete list, by the matrix's own `vendor`
+column:
+
+| vendor | empty-`soc` devices | count |
+|---|---|---:|
+| xiaomi | `Mi_12`, `Mi_12_Pro`, `Mi_12S`, `Mi_12S_Pro`, `Mi_12S_Ultra`, `Mi_12T_Pro`, `Mi_13`, `Mi_13_Pro`, `Mi_A3`, `Poco_F5`, `Poco_F5_Pro`, `Poco_F6_PRo`, `Redmi_K60_Pro` | 13 |
+| oneplus | `OnePlus_9`, `OnePlus_12`, `OnePlus_13`, `Nord_4`, `Nord_CE4`, `Pad_Pro`, `Pad_2_Pro` | 7 |
+| motorola | `G_Stylus_5G-2-2022`, `Moto_G9`, `Moto_G9_Power`, `Moto_G_Stylus_5G` | 4 |
+| samsung | `Galaxy_A71`, `Galaxy_Tab_A7_LTE`, `Galaxy_Tab_A7_Wifi` | 3 |
+| sony | `Xperia_10` | 1 |
+| fairphone | `FP6` | 1 |
+| **total** | | **29** |
+
+Two things this makes clear that the old sentence hid. First, the gap is
+**vendor-concentrated**: only two vendors are empty across the board — xiaomi
+(13/13) and samsung (3/3) — while motorola (4/21), oneplus (7/18), sony (1/7) and
+fairphone (1/3) are partial, and nothing (0/2), google (0/3), realme (0/2) and fxtec
+(0/1) are fully populated. Note that `Nord_4`/`Nord_CE4` are **oneplus** devices in
+the matrix, not nothing — an earlier draft of this table mis-assigned them. Second,
+the 29 are **not** the least-documented devices: `OnePlus_12` and `OnePlus_13` are
+2023-24 flagships with full `bdwlan` coverage, and `Pad_Pro`/`Pad_2_Pro` are
+tablets. The column is simply unfilled for them, which is a matrix defect, not a
+device gap. No complete SoC histogram is derivable from the committed table; it is
+reported as a gap rather than estimated `[N]`.
 
 ---
 
@@ -1423,6 +1447,8 @@ print('exact-md5 repeat rows',dup,'same-name conflicts',con)
 Output: FP5 19,215,739/206 · Edge_30_Fusion 11,855,008/198 · Phone_2 11,639,824/194 ·
 FP6 11,581,906/72 · Nord_4 11,095,209/64 · Nord_CE4 10,967,929/62 · Moto_G200
 10,955,996/183; then `exact-md5 repeat rows 8`, `same-name conflicts 4`.
+
+**9.10b Xiaomi cluster and the non-ASCII `soc` device (§5, §7)**
 ```sh
 python3 -I -c "
 import csv
@@ -1439,6 +1465,29 @@ print('all md5 sets identical?',len(set(s.values()))==1)
 print('non-ascii soc devices:',sorted({r['device'] for r in rows if r['soc'] and not r['soc'].isascii()}))
 "
 ```
+Output: the eight 10,368,220 B devices are exactly the Mi 12 / Poco F5 cluster, all
+md5 sets identical; the sole non-ASCII `soc` device is `Nord_CE3`.
+
+**9.10c The empty-`soc` gap, attributed by vendor (§5)**
+```sh
+python3 -I -c "
+import csv
+from collections import defaultdict,Counter
+M='upstream-contribution/blob-database/coverage-matrix.csv'
+rows=[r for r in csv.DictReader(open(M)) if r['blob_subfamily']=='wpss']
+dev={}; vend={}
+for r in rows: dev.setdefault(r['device'],r['soc']); vend.setdefault(r['device'],r['vendor'])
+empty=[d for d,s in dev.items() if not s]
+by=defaultdict(list)
+for d in empty: by[vend[d]].append(d)
+print('empty total',len(empty),'of',len(dev))
+for v in sorted(by): print('  %-10s %d/%d %s'%(v,len(by[v]),sum(1 for x in vend.values() if x==v),sorted(by[v])))
+print('fully-empty vendors:',sorted(v for v in set(vend.values()) if len(by.get(v,[]))==sum(1 for x in vend.values() if x==v)))
+"
+```
+Output: `empty total 29 of 73`; xiaomi 13/13, oneplus 7/18, motorola 4/21, samsung
+3/3, sony 1/7, fairphone 1/3, and `fully-empty vendors: ['samsung','xiaomi']` —
+nothing, google, realme and fxtec are fully populated.
 
 **9.11 Board ids above 0xFF (§4.1)**
 ```sh
