@@ -136,6 +136,8 @@ Cross-key controls (wrong leaf key): EM tails 0xE0/0x06/0xB5/0x2E — no 0xBC (F
 
 All six DER units per image parse as complete X.509 certificates (SEQUENCE of tbs+sigalg+sig); all use sigalg OID 2a864886f70d01010a (RSASSA-PSS) and 2,048-bit RSA keys (SPKI keybits 2,168 = DER bit-string overhead included).
 
+**Scope limit (added 2026-11-22, #2056).** The PSS sigalg is a property of these `tz.img` images, **not** of the metadata container. A QSEE fingerprint TA (`fingerpr.*`) carries the same `b01` metadata layout (same 256-B sig block, same 3-cert chain, same all-`0xFF` tail, same per-phdr SHA-256 slots) but uses **`sha256WithRSA` (OID 2a864886f70d01010b)** — 6 occurrences per image, PSS OID 0 occurrences in 4/4 images (`research/fleet/other-fingerprint.md` §5.3). So the container is shared while the signature scheme varies by TA.
+
 OP6 chainA (production): leaf@840 (1,387 B, valid 190801141737Z-210801141737Z, subject CN "CASS - CSMS 2.0", carries QSEE policy OUs `15 0001 OEM_ID_INDEPENDENT`, `14 0000 USE_SERIAL_NUMBER_IN_SIGNING`, `13 0001 IN_USE_SOC_HW_VERSION`, `07 0001 SHA256`, `06 0000 MODEL_ID`, `05 00000020 SW_SIZE`, `04 0001 OEM_ID`, `03 ... DEBUG`, `02 6000000000010000 HW_ID`, `01 ... SW_ID`) <- SubCA@2227 (1,096 B, 160304000001Z-260304000001Z, CN "QSEE Attestation Root SubCA 1") <- root@3323 (1,055 B, 151002000001Z-451001235959Z, self-signed "QSEE Attestation Root CA").
 
 OP6 chainB (test): leaf@7240 (1,320 B, 211125155112Z-411120155112Z, "SecTools Test User" with the same OU policy set, SW_SIZE `05 00000248`) <- intermediate@8560 (1,137 B, 171222100313Z-371217100313Z, "QUALCOMM Attestation CA") <- root@9697 (1,153 B, 171222100111Z-371217100111Z, self-signed "QCT Root CA 1", OU "General Use Test Key (for testing 13 only)").
