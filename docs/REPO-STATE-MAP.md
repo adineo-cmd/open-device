@@ -13,8 +13,8 @@ work committed, a named delta remains; **NEW** = no committed deliverable.
 |---|---:|---|---|
 | Firmware family doc | 1,107 | NEW | only stubs (`docs/devices/*/leverage-families.md`, "Deep-RE status: none yet") |
 | Device package | 245 | NEW | `research/devices/` does not exist |
-| SoC package | 27 | PARTIAL | 8 per-SoC GPU result docs under `research/soc/` plus 1 SoC-package note (`Qualcomm-SM8350-Snapdragon-888-soc.md`: CPU/DSP/boot-chain/TZ/firmware census); `per-soc-method-plans.md` is the plan they derive from |
-| CPU/SoC core ID | 27 | PARTIAL | 1 per-SoC CPU cluster map: SM8350 (4×A55 + 3×A78 + 1×X1, one `cpu-map` cluster, three `freq-domain`s) in `research/soc/Qualcomm-SM8350-Snapdragon-888-soc.md` §1; 26 SoCs remain |
+| SoC package | 27 | PARTIAL | 8 per-SoC GPU result docs under `research/soc/` plus 2 SoC-package notes (`Qualcomm-SM8350-Snapdragon-888-soc.md`, `Qualcomm-MSM8998-Snapdragon-835-soc.md`: CPU/DSP/boot-chain/TZ/firmware census); `per-soc-method-plans.md` is the plan they derive from |
+| CPU/SoC core ID | 27 | PARTIAL | 2 per-SoC CPU cluster maps in `research/soc/`: SM8350 (4×A55 + 3×A78 + 1×X1, one `cpu-map` cluster, three `freq-domain`s) and MSM8998 (4+4 Kryo 280, two clusters, `capacity-dmips-mhz` 1024/1536, MIDR `0x51008000`/`0x51008010` from `cputype.h` — no MIDR in the DT); 25 SoCs remain |
 | GPU core ID | 27 | PARTIAL | 8 per-SoC GPU docs under `research/soc/`: MSM8998, SM4375, SM4350, SM7250, SM7325, SM8250, SM8350 (Adreno) + Google Tensor GS201 (Mali-G710, the first non-Adreno part); 19 SoCs remain |
 | Driver interface | 42 | PARTIAL | 10 FP6 interface docs under `research/qualcomm/docs/` |
 | Proprietary blob spec | 9 | PARTIAL | 6 families have committed format work |
