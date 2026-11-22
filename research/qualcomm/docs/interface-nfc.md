@@ -21,15 +21,44 @@ data available here.
   accessed 2026-11-16) has **no** NFC module directory — the NFC stack
   is in-kernel driver + Android userspace HAL (`libnfc-nci`).
 - [LAB] The lab's committed FP6 census (modem/vendor/dsp trees, 665
-  files) contains **no NFC firmware image file**
-  (`qualcomm-fp6/results/census.md`, 2026-11-15). The NFC firmware
-  therefore ships either inside the NFC controller (OTP/flash) or is
-  fetched by the HAL from a path outside the censused partitions.
-- [OPEN] The exact NFC controller part on FP6 (NXP SN100 family vs
-  other) is not stated in any data available to this box; the
-  `nxp-nci` driver below documents the corresponding interface.
+  files) **does** contain an NFC firmware image file:
+  `vendor-firmware/sec_s3nrn4v_firmware.bin`, 184,620 B, sha256
+  `407a4d07e712397d…` (`qualcomm-fp6/results/census.md` line 697,
+  2026-11-15). *(Corrected 2026-11-22, issue #2060: this bullet
+  previously read "contains **no NFC firmware image file**" and
+  inferred the firmware was OTP-only. That was false against the
+  census row it cited. See `research/fleet/other-nfc.md` §8 for the
+  decode of the file and the hash reconciliation.)* The image is an
+  `s3fwrn5`-format container: 44-byte header + two 128-byte signature
+  blobs + the image in 4096-byte sectors
+  (`44 + 128 + 128 + 45×4096 = 184,620` exactly). The LWN series
+  *"nfc: s3fwrn5: support the S3NRN4V variant"* records that this
+  chip **also** ships with working firmware and that mainline skips
+  the download step on it, so the file is an update/recovery artifact
+  rather than a must-load-at-boot blob.
+- [LAB] The NFC controller on FP6 is a **Samsung S3NRN4V**, not an NXP
+  part. *(Corrected 2026-11-22, issue #2060: this bullet was `[OPEN]`,
+  reading "the exact NFC controller part on FP6 (NXP SN100 family vs
+  other) is not stated in any data available to this box". The
+  filename `sec_s3nrn4v_firmware.bin` states it, Samsung's part page
+  lists `S3NRN4V (192K)`, and the LWN series names the Fairphone 6
+  (SM7635) as a board using it.)* Consequence: the `nxp-nci` protocol
+  table in §2 below is **accurate but describes a different vendor's
+  part**. The matching driver family for this device is
+  `drivers/nfc/s3fwrn5/`, whose command set and container are
+  documented in `research/fleet/other-nfc.md` §3 and §5.3.
 
 ## 2. The driver ↔ controller interface, layer by layer
+
+`[LAB]` **Scope note (added 2026-11-22, issue #2060).** The table below documents
+the **NXP `nxp-nci`** path, which is *not* the part on this device (§1). It is
+retained because the transport/framing/runtime layers are generic NCI and hold
+for the Samsung part too; only the `boot mode` and `firmware download` rows are
+NXP-specific. For the actual FP6 controller (`s3fwrn5` family) the download
+protocol is `0x00 RESET`, `0x01 GET_BOOTINFO`, `0x02 ENTER_UPDATE_MODE`
+(with `SHA1(image)` + signature), `0x04 UPDATE_SECTOR` (one whole sector per
+command), `0x05 COMPLETE_UPDATE_MODE`, 1000 ms per-message timeout — see
+`research/fleet/other-nfc.md` §5.3.
 
 All anchorable in mainline (`torvalds/linux`, accessed 2026-11-16):
 
@@ -48,6 +77,12 @@ All anchorable in mainline (`torvalds/linux`, accessed 2026-11-16):
    parse → NCI `CORE_RESET`/`CORE_INIT` round trip.
 2. Firmware path: `0xF0` → `0xC0` WRITE chunk loop with integrity
    check → session-state query; must tolerate the 30 s timeout window.
+   *(NXP path. For the FP6's actual `s3fwrn5` part the equivalent is
+   `0x02 ENTER_UPDATE_MODE` → `0x04 UPDATE_SECTOR` loop →
+   `0x05 COMPLETE_UPDATE_MODE`, one 4096-byte sector per command — and
+   per the LWN series the download is skipped entirely on this chip
+   because it reports a hardware version mainline has no base address
+   for. Corrected 2026-11-22, issue #2060.)*
 3. Data plane: NCI data-connection open, RF interface activation,
    ISO-DEP exchange — assertable with a virtual NCI device
    (`drivers/nfc/virtual_ncidev.c` exists in mainline for exactly this
@@ -62,9 +97,17 @@ All anchorable in mainline (`torvalds/linux`, accessed 2026-11-16):
 - https://api.github.com/repos/torvalds/linux/contents/drivers/nfc (directory listing)
 - https://api.github.com/repos/LineageOS/android_kernel_fairphone_sm7635-modules/contents/qcom/opensource (no NFC module)
 - https://api.github.com/repos/LineageOS/android_kernel_fairphone_SM7635/contents/drivers/nfc (mainline-equivalent set present)
-- Lab: `qualcomm-fp6/results/census.md` (no NFC firmware file in the censused trees)
+- Lab: `qualcomm-fp6/results/census.md` — ~~no NFC firmware file in the
+  censused trees~~ **contains `vendor-firmware/sec_s3nrn4v_firmware.bin`,
+  184,620 B, sha256 `407a4d07e712397d…`** (line 697; corrected 2026-11-22,
+  issue #2060)
+- Added 2026-11-22 (issue #2060): `torvalds/linux` `drivers/nfc/s3fwrn5/`
+  `{firmware.c,firmware.h,core.c,nci.c}`; `lwn.net/Articles/1087764/`
+  (`[PATCH v4 0/6] nfc: s3fwrn5: support the S3NRN4V variant`);
+  `semiconductor.samsung.com/…/s3nrn4v/`; `research/fleet/other-nfc.md`
 
 **Clean-room statement:** everything above is public-kernel/standard
-material plus lab census negatives; no proprietary content, no
-decompiled code. The FP6 controller identity and any FP6-specific
-firmware file are flagged [OPEN] rather than guessed.
+material plus lab census facts; no proprietary content, no decompiled
+code. The FP6 controller identity is **Samsung S3NRN4V** (§1, corrected
+2026-11-22) and its firmware file is `sec_s3nrn4v_firmware.bin` in
+`vendor/firmware`; no other FP6-specific firmware path is claimed.
