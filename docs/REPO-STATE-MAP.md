@@ -13,8 +13,8 @@ work committed, a named delta remains; **NEW** = no committed deliverable.
 |---|---:|---|---|
 | Firmware family doc | 1,107 | NEW | only stubs (`docs/devices/*/leverage-families.md`, "Deep-RE status: none yet") |
 | Device package | 245 | NEW | `research/devices/` does not exist |
-| SoC package | 27 | PARTIAL | 5 per-SoC GPU result docs under `research/soc/`; `per-soc-method-plans.md` is the plan they derive from |
-| CPU/SoC core ID | 27 | NEW | none |
+| SoC package | 27 | PARTIAL | 6 per-SoC GPU result docs under `research/soc/` plus 1 SoC-package note (`Qualcomm-SM8350-Snapdragon-888-soc.md`: CPU/DSP/boot-chain/TZ/firmware census); `per-soc-method-plans.md` is the plan they derive from |
+| CPU/SoC core ID | 27 | PARTIAL | 1 per-SoC CPU cluster map: SM8350 (4×A55 + 3×A78 + 1×X1, one `cpu-map` cluster, three `freq-domain`s) in `research/soc/Qualcomm-SM8350-Snapdragon-888-soc.md` §1; 26 SoCs remain |
 | GPU core ID | 27 | PARTIAL | 6 per-SoC GPU docs under `research/soc/`: MSM8998, SM4375, SM7250, SM7325, SM8250, SM8350; 21 SoCs remain |
 | Driver interface | 42 | PARTIAL | 10 FP6 interface docs under `research/qualcomm/docs/` |
 | Proprietary blob spec | 9 | PARTIAL | 6 families have committed format work |
