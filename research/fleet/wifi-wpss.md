@@ -717,7 +717,14 @@ equal? True
 ```
 
 The fleet partitions into `b`-only (28 devices), `e`-only (26), both (6), and
-neither (13, `bdwlan.bin`-only). What that partition *means* is now measured
+neither (13 — devices with no `bdwlan.b<NN>` and no `bdwlan.e<NN>` at all). The
+`neither` group is **not** uniformly "`bdwlan.bin`-only": only **10** of the 13
+carry `bdwlan.bin`, while the other 3 (`Pixel_4A_5G`, `Pixel_5`, `Pixel_5A`) name
+every board explicitly (`bdwlan-bramble.bin`, `bdwlan-redfin.bin`,
+`bdwlan-barbet.bin`) and carry no wildcard at all. An earlier draft labelled all 13
+as `bdwlan.bin`-only; the 13 count was right, the label was not `[F]`.
+
+What that partition *means* is now measured
 (§3.3): `b`-only devices carry the raw **26,328**-byte body and `e`-only devices
 carry only the ELF-wrapped form. The two groups' part numbers are **completely
 disjoint** `[F]`:
@@ -1463,6 +1470,31 @@ print('split-device set == both-b-and-e set?',sp==(b&e))
 print('both',len(b&e),'b-only',len(b-e),'e-only',len(e-b),'neither',len(all-b-e))
 "
 ```
+
+**9.9a The 13 `neither` devices, and how many really carry `bdwlan.bin` (§5)**
+```sh
+python3 -I -c "
+import csv,re
+from collections import defaultdict
+M='upstream-contribution/blob-database/coverage-matrix.csv'
+rows=[r for r in csv.DictReader(open(M)) if r['blob_subfamily']=='wpss']
+names=defaultdict(set)
+for r in rows: names[r['device']].add(r['filename'])
+devs=set(names)
+b={d for d in devs if any(re.fullmatch(r'bdwlan\.b[0-9a-f]{2,3}',f) for f in names[d])}
+e={d for d in devs if any(re.fullmatch(r'bdwlan\.e[0-9a-f]{2,3}',f) for f in names[d])}
+neither=sorted(devs-b-e)
+print('b-only',len(b-e),'e-only',len(e-b),'both',len(b&e),'neither',len(neither))
+hasbin=[d for d in neither if 'bdwlan.bin' in names[d]]
+print('neither with bdwlan.bin',len(hasbin),'of',len(neither))
+print('neither without bdwlan.bin',sorted(set(neither)-set(hasbin)))
+for d in sorted(set(neither)-set(hasbin)):
+    print('  %-12s %s'%(d,sorted(f for f in names[d] if f.startswith('bdwlan'))))
+"
+```
+Output: `b-only 28 e-only 26 both 6 neither 13`; `neither with bdwlan.bin 10 of 13`;
+`neither without bdwlan.bin ['Pixel_4A_5G', 'Pixel_5', 'Pixel_5A']`, each carrying only
+its codename files (`bdwlan-bramble.bin`, `bdwlan-redfin.bin`, `bdwlan-barbet.bin`).
 
 **9.10 Shared content sets (§5 SoC note, §6, §7)**
 ```sh
