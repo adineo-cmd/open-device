@@ -275,7 +275,7 @@ outer ELF's `e_machine=164` (`EM_QDSP6`) is a label for the container, not for t
 RISC-V core inside it `[F]`.
 
 **The `e_machine=3` (`EM_386`) image is not x86 code.** Its only executable section
-is `.data` at `p_vaddr=0x4ff00000`, 262,144 B, and its `.strtab` contains:
+is `.data` with `sh_addr=0x4ff00000` and `sh_size=262,144`, and its `.strtab` contains:
 
 ```
 _binary_padded_pcss_m3_tx_rx_bin_start
@@ -288,7 +288,12 @@ image wrapped in an ELF with a placeholder machine id. On the `qcm6490` build th
 `.data` payload is 262,144 B, entropy 5.524 bits/B, 174,581 of 262,144 bytes
 non-zero, 2,319 bytes of trailing zero pad; the `sc7280` build differs slightly
 (entropy 5.508, 173,805 non-zero) with the same size and the same trailing pad.
-Both builds place it at `p_vaddr=0x4ff00000` with `p_filesz=266,684` `[F]`.
+**Correction to the address field (Rule 1).** `0x4ff00000` is the **section** header's
+`sh_addr`, not a program header's `p_vaddr` — no phdr in either build carries that
+value. The enclosing phdr 6 has a *different* `p_vaddr` per build (`0xc0869000` on
+`sc7280`, `0xc089d000` on `qcm6490`) while `p_filesz=266,684` and `p_memsz=270,336`
+are identical, and `.data` sits at `sh_offset=4096` inside it. An earlier draft
+called `0x4ff00000` a `p_vaddr`; it is the section address `[F]`.
 
 **Correction (Rule 1):** [`../qualcomm/results/census.md`](../qualcomm/results/census.md)
 line 592 labelled `wpss.b08` as `ELF / x86` — only the raw `e_machine` value, never
@@ -1206,6 +1211,10 @@ for fn in ('wpss_sc7280.mbn','wpss_qcm6490.mbn'):
 Output: both builds `ph6 filesz=266684`, `.data addr=0x4ff00000 size=262144`,
 `pad=2319`, three `_binary_padded_pcss_m3_tx_rx_bin_*` symbols; entropy 5.508
 (`sc7280`) and 5.524 (`qcm6490`), non-zero 173,805 and 174,581 respectively.
+The script prints `s[3]`, the **section** header's `sh_addr` — that is where
+`0x4ff00000` comes from. It is not a `p_vaddr`: the enclosing phdr 6 has
+`p_vaddr=0xc0869000` (`sc7280`) / `0xc089d000` (`qcm6490`), with identical
+`p_filesz=266684` and `p_memsz=270336`, and `.data` at `sh_offset=4096` within it.
 
 **9.5a `board-2.bin` TLV tail layouts (§3.3)**
 ```sh
