@@ -99,10 +99,10 @@ Header base (== hash-table offset) is **chain-count dependent on SM8250, fixed o
 | header word (u32le) | 1-chain images (n=22) | 2-chain images (n=6) | prior doc claim |
 |---|---|---|---|
 | base / word count | SDM845: 40 B (10 words); SM8250: **168 B (42 words)** | SDM845: 40 B; SM8250: **288 B (72 words)** = 168 + 120 | "SM8250 header 288 B" — actually the 2-chain size |
-| w[1] | SDM845: 5; SM8250: 6 (constant per SoC, H: secboot metadata version) | same | "25/5 vs 0/6" — w[0] is actually image-specific, see below |
+| w[1] | SDM845: 5; SM8250: 6 (**= MBN format version**, settled 2026-11-22 in `research/fleet/tz-hyp.md` §3.2) | same | "25/5 vs 0/6" — w[0] is actually image-specific, see below |
 | w[2] | **0** | 256 | "w[2] = sig block size" — set only when a second chain exists |
 | w[3] | **0** | 6144 | "constant 6144" — refuted; second-chain cap |
-| w[4] - w[5] | **6,400** | **19,200** | "constant 19,200" — refuted; 6400 + 12800 x (chains-1) |
+| w[4] - w[5] | **6,400** | **19,200** | "constant 19,200" — refuted; 6400 + 12800 x (chains-1), **v5/v6 only** (see note below) |
 | w[7] | 256 | 256 | sig block size (holds, all 28) |
 | w[9] | **6,144** | **12,288** | "constant 12288" — refuted; **w[9] = 6144 x chain_count** (28/28) |
 | w[10] (SM8250 only) | 0 | 120 | per-chain header extension, 120 B/chain |
@@ -110,6 +110,8 @@ Header base (== hash-table offset) is **chain-count dependent on SM8250, fixed o
 | w[0] | image-specific, in {0, 4, 5, 25} (e.g. tz: 25 SDM845 / 0 SM8250; cmnlib 4; imagefv, xbl 5) | same | unassigned |
 
 Rules w[9] = 6144 x chains, w[4]-w[5] = 6400 + 12800 x (chains-1), w[2]/w[3] zero unless second chain, w[10] = 120 x (chains-1) hold **28/28** (F). Interpretation (I): the SM8250 header is a fixed 168-B base plus one 120-B extension per extra chain; w[9] and w[3] are per-chain size caps of 6144 B; w[4]-w[5] encodes the same per-chain budget in the "offset of the first sig/chain region" field. The qsee-crossgen.md descriptor pairs `[7,0,1,0,0,X,24584]` at words 14-20 and 44-50 sit inside this 120-B per-chain region; single-chain images carry one region (values differ per image, e.g. abl `28,0,81,19821,0,258,24584`, xbl `0,0,81,19821,0,2,24584`) — values unassigned (H).
+
+- **Scope limit on the `w[4]-w[5]` rule (added 2026-11-22, #2065).** The four rules above hold on all 28 images swept here, which are all **MBNv5 (w[1]=5)** or **MBNv6 (w[1]=6)**. They are **not** properties of the hash segment as such: the MBNv7 `hyp.img` from FP6 has `w[4]=224`, `w[5]=336`, so `w[4]-w[5] = -112` (`research/fleet/tz-hyp.md` §3.4). In v7, `w[4]` denotes the metadata-block region *preceding* the hash table rather than the size after it, and the general form is `filesz = header + Σ(metadata blocks) + hash table + Σ(sig + certs)`. Read the rules above as scoped to the v5/v6 container.
 
 ## 5. Hash-slot semantics — confirmed fleet-wide (F)
 
@@ -162,7 +164,7 @@ Rules w[9] = 6144 x chains, w[4]-w[5] = 6400 + 12800 x (chains-1), w[2]/w[3] zer
 - w[0] semantics ({0,4,5,25}); descriptor-region word values (per-image).
 - Exact byte range signed by each 256-B PSS block (unchanged from qsee-crossgen.md).
 - w[4]-w[5] budget decomposition (6400 + 12800/chain) — which sub-regions the 6400/12800 account for.
-- Whether w[1] (5 vs 6) is a secboot metadata format version and whether it flips with the hash width or with the SoC generation (only one SoC per value observed).
+- ~~Whether w[1] (5 vs 6) is a secboot metadata format version and whether it flips with the hash width or with the SoC generation (only one SoC per value observed).~~ **Answered 2026-11-22 (#2065): `w[1]` is the MBN format version.** A third generation decodes at `w[1]=7`, and that image's own certificate subject reads `SRoT MBNv7 Image Signing Root CA 6` — the number is printed by the certificate. It does not track hash width (SM8250 and QCM6490 are both SHA-384 at `w[1]` 6 and 7). The MBNv5 metadata-in-OU-fields behaviour is independently visible in the SDM845 leaf cert. See `research/fleet/tz-hyp.md` §3.2.
 - Root-of-trust question (I/H): whether the OEM test-root chain is accepted by retail fuse state or only on engineering devices — needs boot-chain evidence beyond blobs.
 
 ## 10. Honest negatives
