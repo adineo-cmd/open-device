@@ -211,6 +211,19 @@ presenting it as a result.
    comes from factory images (`db_path = google/cheetah/radio`). So unlike the `gpu` notes in
    this series, **nothing here is byte-verified against an upstream source**; every statement
    is matrix-internal. This is the note's main limitation [N].
+
+   > **Correction, 2026-11-22 (issue #1682).** This is wrong, and it is wrong in a way that
+   > matters. The blobs *are* in the vendor tree — under **`radio/`**, not
+   > `proprietary/vendor/firmware/`, which is the only path I checked. `radio/` holds
+   > `abl.img`, `bl1.img`, `bl2.img`, `bl31.img`, `gsa.img`, `ldfw.img`, `modem.img`,
+   > `pbl.img`, `tzsw.img` as **git-lfs pointers carrying the sha256 and true size**. All
+   > **64/64** sizes match the matrix, and the sha256 partition reproduces the matrix md5
+   > partition exactly for `abl`/`bl1`/`bl31`/`tzsw` (10 groups each, set-equal). So §3's
+   > matrix-internal result **is** independently confirmed, and 4 of these 9 rows are
+   > vendor-verifiable. I mis-scoped the search, not the data. See
+   > `docs/devices/google/Pixel_8/boot.md` §3 and #1670. The text above is left visible
+   > because the error is instructive: I searched one directory and concluded about the
+   > whole tree. [N] → corrected.
 3. **`sha256_if_listed` is empty for all 9 rows**, and for 1,027 of 1,038 `boot` rows
    fleet-wide (11 populated). There is no second hash to cross-check the md5s against [N].
 4. **The "size ⇒ generation" purity is a 13-device, 3-generation observation.** Four
