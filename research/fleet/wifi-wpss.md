@@ -603,7 +603,15 @@ Command §9.7. Exact on 11 of 11. Board id 25 → `b19` because 25 decimal = 0x1
 This answers the open item in [`bdwlan-format.md`](bdwlan-format.md) §10 ("what
 selects a variant at runtime"): **the filename suffix is the QMI board id in
 lowercase hex** `[F]`. It explains why the suffix space stops at 0x71 and 0xe1
-rather than 0xff, and why `bdwlan.bin` exists on 67 of 73 devices.
+rather than 0xff.
+
+**A related count that is easy to conflate, and an earlier draft did.** `bdwlan.bin`
+(board id 255) is carried by **44** of the 73 devices. **67** of 73 carry *either*
+`bdwlan.bin` (44) *or* `bdwlan.elf` (28), overlapping on 5 — the 67 is a union
+count, not a `bdwlan.bin` count. The six devices carrying neither are
+`OnePlus_9`, `OnePlus_9RT`, `OnePlus_9_Pro`, `Pixel_4A_5G`, `Pixel_5` and
+`Pixel_5A` — i.e. two whole product lines that name every board explicitly rather
+than shipping a wildcard `[F]`.
 
 ### 4.1 Board ids above 0xFF — three candidate forms, and only two appear `[F]`
 
