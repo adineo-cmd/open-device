@@ -537,16 +537,28 @@ both forms, presumably for two different carrier-selection paths `[I]`.
 | 25 (`variant=Qualcomm_rb3gen2`) | 33 | 33 (**10 B**) | 57,594 | 586 B |
 
 Entries 9 and 10 split what the others keep whole: tag 33 is 596 B in one and
-10 B + 582 B in the other, and the split payload is **not** the concatenation
-(checked: `b1[33] ≠ b9[33] ‖ b9[34]`).
+10 B + 582 B in the other. That split is **exactly** the whole payload plus a fixed
+4-byte zero tail — measured on all eight 33-tag boards:
+
+```
+b1[33]                    596 B  = 00×10 ‖ 582 B ‖ 00×4
+b9[33] (10 B) ‖ b9[34] (582 B)  = 592 B
+b1[33][:592] == b9[33] ‖ b9[34]   True    (and identical on boards 2-7 and 255)
+```
+
+So the grammar is one payload written two ways: the split form drops the trailing
+4 zero bytes, and the whole form carries them. A naive `b1[33] ≠ b9[33] ‖ b9[34]`
+comparison is what an earlier draft checked, and it reports "different" only because
+of those four bytes `[F]`.
 
 Board 25 is the outlier worth flagging: its tag 33 declares 10 B, and the next 152
 bytes are zero, after which sits a well-formed header `22 00 46 02` (tag 34, len 582)
 whose payload would run 152 B past the end of the 58,180-byte body. Read naively,
 the entry looks truncated; read as the other entries are read, it is a body that
 **shipped with a mis-declared tail** `[F]`. Its 434-byte remainder from the tag-34
-header is byte-identical to board 9's, so the bytes are present — only the length
-bookkeeping is wrong `[F]`.
+header is a byte-identical **prefix** of board 9's 586-byte tag-34 block (verified:
+`r25 == blk9[:434]`, first difference: none), so the bytes are present — only the
+length bookkeeping is wrong `[F]`.
 
 **Consequences for a parser `[I]`:**
 
@@ -1269,6 +1281,52 @@ while pos+8<=len(d):
 ```
 Output: boards 1–7 and 255 → 33 tags, last `(33,596)`, tail 0; boards 9 and 10 →
 34 tags, last `(34,582)`; board 25 → 33 tags, last `(33,10)`, tail 586.
+
+**9.5a2 The split tag-33 payload and board 25's prefix (§3.3)**
+```sh
+python3 -I -c "
+import struct,re
+d=open('ath11k_WCN6750_hw1.0_board-2.bin','rb').read(); pos=20
+bodies={}
+while pos+8<=len(d):
+    i,n=struct.unpack_from('<II',d,pos)
+    if not n or pos+8+n>len(d): break
+    b=d[pos+8:pos+8+n]
+    if i==0:
+        t,nl=struct.unpack_from('<II',b,0); name=b[8:8+nl].decode('latin1')
+        if name.startswith('bus='):
+            off=(8+nl+3)&~3; dt,dl=struct.unpack_from('<II',b,off); data=b[off+8:off+8+dl]
+            e=struct.unpack_from('<HHIIIIIHHHHHH',data,16)
+            S=[struct.unpack_from('<IIIIIIIIII',data,e[5]+j*e[10]) for j in range(e[11])]
+            base=S[e[12]][4]
+            for sh in S:
+                if data[base+sh[0]:].split(b'\x00')[0]==b'.data':
+                    bodies[re.search(r'qmi-board-id=(\d+)',name).group(1)]=data[sh[4]:sh[4]+sh[5]]
+    pos+=8+n
+def walk(dd):
+    q=0; tags=[]
+    while q+4<=len(dd):
+        tg,ln=struct.unpack_from('<HH',dd,q)
+        if tg==0 and ln==0: break
+        tags.append((tg,ln,q)); q+=4+ln
+    return tags,q
+t1,_=walk(bodies['1']); t9,_=walk(bodies['9'])
+p1=bodies['1'][t1[-1][2]+4:][:596]
+t33=[x for x in t9 if x[0]==33][0]; t34=[x for x in t9 if x[0]==34][0]
+cat=bodies['9'][t33[2]+4:][:10]+bodies['9'][t34[2]+4:][:582]
+print('b1[33] len',len(p1),' b9[33]||b9[34] len',len(cat))
+print('b1[33][:592] == concat:',p1[:592]==cat,'  extra:',p1[592:].hex(' '))
+r25=bodies['25'][57594+152:]
+print('board25 remainder',len(r25),'== b9 tag34 block prefix:',r25==bodies['9'][57594:][:len(r25)])
+for k in ('2','3','4','5','6','7','255'):
+    tk,_=walk(bodies[k]); pk=bodies[k][tk[-1][2]+4:][:596]
+    assert pk==p1,k
+print('all eight 33-tag boards share the 596 B payload: True')
+"
+```
+Output: `b1[33] len 596  b9[33]||b9[34] len 592`; `b1[33][:592] == concat: True
+extra: 00 00 00 00`; `board25 remainder 434 == b9 tag34 block prefix: True`; and
+`all eight 33-tag boards share the 596 B payload: True`.
 
 **9.5b Which build each device matches (§2.2)**
 ```sh
