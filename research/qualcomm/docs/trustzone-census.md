@@ -115,11 +115,23 @@ Segment highlights (full tables in the results JSON):
 
 ## Kernel-side cross-reference
 
-- Upstream Linux gained Qualcomm QSEECOM support (drivers/tee/qcom,
-  `qseecom.c`, merged in the v6.8 era per public kernel history) that
-  loads/calls QSEE apps via the `qsee` interface — the TA images documented
-  here are the userspace side of that ABI. No upstream code parses the
-  images themselves; nothing in the kernel tree describes their ELF layout.
+- Upstream Linux gained Qualcomm QSEECOM support that **queries app IDs and
+  registers client devices** via the `qsee` interface — the TA images
+  documented here are the userspace side of that ABI. *Corrected 2026-11-25
+  (`misc` census, #2059):* this section previously cited the driver as
+  `drivers/tee/qcom/qseecom.c` and said it "loads/calls QSEE apps". That path
+  is **404** in `torvalds/master`; the in-tree driver is
+  `drivers/firmware/qcom/qcom_qseecom.c` (with
+  `qcom_qseecom_uefisecapp.c` as its one client), and it does **not** load
+  anything — it calls `qcom_scm_qseecom_app_get_id()` and skips the device
+  when the app is absent, its own comment stating the app is "already loaded
+  (usually by firmware bootloaders)". Its entire app table is one entry,
+  `{ "qcom.tz.uefisecapp", "uefisecapp" }` — against the 107 `.mdt` stems in
+  the `misc` bucket. The 404 was already recorded in
+  `implementations/tz/README.md` and
+  `upstream/pr10-remaining-issues-package.md`. The load-bearing clause above
+  stands unchanged: no upstream code parses the images themselves, and
+  nothing in the kernel tree describes their ELF layout.
 - The QSEE `.mdt`-split TA format is the one the older qseecom (Caf)
   sources handled; the modern **monolithic-ELF** partition images above are
   loaded by the bootloader/UEFI stage, not the kernel — which is why no

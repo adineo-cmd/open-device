@@ -512,6 +512,14 @@ is not repeated here.
 eight-part TA lacks the alias or merely renumbers it. The correlation is exact and the mechanism
 is measured; the causal link between the two is `[U]`.
 
+> **Answered 2026-11-25** (`research/fleet/other-misc.md` §3.4, issue #2059). The corpus *can*
+> show it: 17 eight-part ELF64 TAs are present under
+> `data-fetch/second-device/instantnoodle/modem-fat-lfn/`, and **0 of 17** carry a duplicated
+> `(p_offset, p_filesz)` pair, against **16 of 16** nine-part ones. Neither option offered above
+> is right — the alias and the nine-part shape are the same feature, and the eight-part shape is
+> not a renumbering of it. The paragraph above is left as written: it was an honest `[U]` for the
+> inputs that note had, not an error.
+
 ### 8.7 `soter64` is not fingerprint-sensor firmware `[N]`
 
 Stated positively so it is not re-derived: `soter64` is the SOTER key/attestation TA (§2.3).
