@@ -725,12 +725,14 @@ does not.
 
 **Honest negative `[N]`:** only 24 of the 36 WCN3990 entries are distinct bodies,
 and exactly one of those 24 carries **two different board-id labels** (`67` and
-`ff`, md5 `7a0b6bc520a3…`), so body content alone cannot determine the board.
-(An earlier draft said 10 bodies were shared across labels; re-measured, 10 is the
-number of *duplicate entries* within a single label, and the label-collision count
-is 1.) No byte-identity between any upstream `board-2.bin` body and any Android
-`bdwlan` row could be established — the payloads are not on this machine, only
-their sizes and md5s `[N]`.
+`ff`, md5 `7a0b6bc520a3…`), so body content alone cannot determine the board. (An
+earlier draft called 10 "the number of duplicate entries within a single label";
+re-measured, that count is **11**, and 10 is the number of distinct *bodies* that
+appear more than once — of which 9 repeat only inside their own label and 1 sits
+under two labels. The 12 excess entries decompose exactly: 36 entries − 24 distinct
+bodies = 12 = 11 within-label repeats + 1 cross-label repeat.) No byte-identity
+between any upstream `board-2.bin` body and any Android `bdwlan` row could be
+established — the payloads are not on this machine, only their sizes and md5s `[N]`.
 
 ---
 
@@ -1505,11 +1507,12 @@ print('identical generic body (67 vs ff)?', rows[0][1:]==rows[1][1:])
 "
 ```
 The last line is the decisive one: the two generic entries carry the same `u16@10`
-and the same `u16@408`. Confirm they are the same *body* by hashing:
+and the same `u16@408`. Confirm they are the same *body* by hashing, and decompose
+the 12 excess entries:
 ```sh
 python3 -I -c "
 import struct,hashlib,re
-from collections import defaultdict
+from collections import defaultdict,Counter
 d=open('ath10k_WCN3990_hw1.0_board-2.bin','rb').read()
 rows=[]
 for i in range(60,len(d)-8):
@@ -1520,14 +1523,21 @@ for i in range(60,len(d)-8):
         while k>0 and 32<=d[k-1]<127: k-=1
         nm=d[k:i-8].decode('latin1')
         if nm.startswith('bus='): rows.append((nm,d[i:i+ln]))
-g=defaultdict(set)
-for nm,b in rows: g[hashlib.md5(b).hexdigest()].add(re.search(r'qmi-board-id=([0-9a-f]+)',nm).group(1))
+g=defaultdict(set); per=defaultdict(list)
+for nm,b in rows:
+    bd=re.search(r'qmi-board-id=([0-9a-f]+)',nm).group(1)
+    h=hashlib.md5(b).hexdigest(); g[h].add(bd); per[bd].append(h)
 print('entries',len(rows),'distinct bodies',len(g))
 print('bodies with >1 board-id label:',[(k[:12],sorted(v)) for k,v in g.items() if len(v)>1])
+print('bodies appearing >1 time:',sum(1 for c in Counter(h for _,h in rows).values() if c>1))
+print('within-label repeat entries:',sum(len(v)-len(set(v)) for v in per.values()))
+print('excess = entries - distinct:',len(rows)-len(g))
 "
 ```
-Output: 36 entries, **24** distinct bodies, and exactly **one** body carrying two
-labels (`67` and `ff`).
+Output: 36 entries, **24** distinct bodies, exactly **one** body carrying two
+labels (`67` and `ff`), **10** bodies appearing more than once, **11**
+within-label repeat entries, and **12** excess — which reconciles as
+`11 within-label + 1 cross-label = 12`.
 
 For WCN6750 substitute the ath11k container parser (§9.6/§9.7) and read the
 `.data` body; the printed `u16@10` set has 10 members for 11 board ids, with
