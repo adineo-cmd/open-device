@@ -40,7 +40,7 @@ Every payload statement below is matrix metadata — filename, size, md5 — and
 | `qcom/sm8350/` in linux-firmware | **exactly 1 entry, and it is a symlink**; **0** real files | [F] |
 | Board-DT firmware requests that resolve | **1 of 11** distinct paths (only `a660_zap.mbn`) | [F] |
 | Split-segment law `mdt == b00+b01` | **23 of 23** stems, zero exceptions; 15 further stems are self-contained | [F] |
-| `b00` size form | `52+32N` (ELF32) on 8 stems, `64+32N` (ELF64) on 15, neither on 0; the `32`/`64` filename suffix matches the header **7 of 7** | [F] |
+| `b00` size form | `52+32N` (ELF32) on 8 stems, `64+56N` (ELF64) on 15, neither on 0; the `32`/`64` filename suffix matches the header **7 of 7** | [F] |
 | postmarketOS support | **OnePlus only** (`lemonade`, `lemonadep`), on a **fork pinned to 6.7 / 2024-01-16** | [F] |
 
 The two headline findings are the linux-firmware absence (§6) and the
@@ -506,14 +506,14 @@ narrow, and the narrow statement holds 23/23 [F].
 ### 6.5 `b00` encodes the ELF class — and the filename suffix agrees with it
 
 The `b00` size is not arbitrary. It is the ELF header plus the program-header
-table, so it decomposes as `52 + 32N` for ELF32 and `64 + 32N` for ELF64 (52- and
-64-byte headers, 32-byte program headers). Every one of the 23 split stems fits
-one of the two forms exactly:
+table, so it decomposes as `52 + 32N` for ELF32 and `64 + 56N` for ELF64 (52- and
+64-byte headers, **32-byte ELF32 program headers and 56-byte ELF64 program
+headers**). Every one of the 23 split stems fits one of the two forms exactly:
 
 | form | stems |
 |---|---:|
 | `52 + 32N` (ELF32) | **8** |
-| `64 + 32N` (ELF64) | **15** |
+| `64 + 56N` (ELF64) | **15** |
 | neither | **0** |
 
 And `N` tracks the segment count, with a small constant offset:
@@ -525,13 +525,21 @@ And `N` tracks the segment count, with a small constant offset:
 | `slpi` | 852 | `52+32×25` | 25 | 24 | 1 |
 | `modem` | 980 | `52+32×29` | 29 | 26 | 3 |
 | `evautil`,`gpqese`,`smplap32`,`voicepri` | 308 | `52+32×8` | 8 | 8 | 0 |
-| 15 ELF64 stems | 512 | `64+32×14` | 14 | 8 | 6 |
+| 15 ELF64 stems | 512 | `64+56×8` | 8 | 8 | **0** |
 
 `N − segments` is the count of program headers that do **not** have a `bNN`
-file of their own — the `PT_NULL`/hash/certificate entries. That it is a small
-constant per family, and that `modem` needs three more than `adsp`, is
-consistent with the `.mdt` carrying header+hash and the payload being split off
-(§6.4) [I] for the interpretation, [F] for the arithmetic.
+file of their own — the `PT_NULL`/hash/certificate entries. That it is zero for
+every ELF64 stem and small for the big ELF32 DSP stems, and that `modem` needs
+three more than `adsp`, is consistent with the `.mdt` carrying header+hash and
+the payload being split off (§6.4) [I] for the interpretation, [F] for the
+arithmetic.
+
+[F] **Correction (2026-11-24, from `research/soc/Qualcomm-SM4375-Snapdragon-4-Gen-1-soc.md` §7.2):**
+this section originally gave the ELF64 form as `64 + 32N` and the ELF64 row as
+`64+32×14` with `N − segments = 6`. Both were wrong: an ELF64 program header is
+**56 bytes**, not 32. `512 = 64 + 56×8`, so each ELF64 stem here has **8**
+program headers for 8 segments and the residual is **0**, not 6. The count of
+stems (15) and the 7-of-7 suffix match are unaffected.
 
 **The filename suffix agrees with the header.** Of the 23 stems, seven carry an
 explicit `32` or `64` suffix, and all seven match:
@@ -554,12 +562,14 @@ ELF classes — `evautil` is the 32-bit build of `evautil64`, not a different to
 [F] for the sizes and suffix correlation, [I] for the "same applet, two builds"
 reading.
 
-Matrix-wide the rule is weaker and this note does not claim it there: of **122**
-stems with both an `.mdt` and a `.b00`, 56 fit `52+32N`, 28 fit `64+32N`, and
-**38 fit neither** — those 38 cluster at `b00 = 568`, a size that is neither
-`52+32N` nor `64+32N` for any integer `N`, and they are not TZ applets at all
-(names like `gfzeus6`, `gfdit`, `fpcmond` and bare UUIDs). So the two-form law is
-a property of this slice's signed PIL set, not of every `.b00` in the corpus [F].
+Matrix-wide the law is stronger than this note originally thought, not weaker:
+of the **122** distinct stem names carrying both an `.mdt` and a `.b00`, **49**
+fit `52+32N` and **73** fit `64+56N`, with **0** fitting neither [F]. The
+earlier draft reported "56 / 28 / 38 neither, clustering at `b00 = 568`" — that
+was the same wrong constant: `568 = 64 + 56×9`, so the 42 stems at 568 were
+ELF64 all along, and so was the 400-byte one. So the two-form law holds
+corpus-wide on every `.mdt`+`.b00` stem, not just on this slice [F] — though it
+remains a size-level regularity, not a parsed header (§9 item 16).
 
 ### 6.6 Three different spellings, and only the third is missing
 
@@ -929,14 +939,15 @@ different dataset, not a new claim [F].
     document; this note cites the corrected arithmetic and leaves the edit to
     its owner.
 
-16. **The `52+32N` / `64+32N` decomposition is inferred from sizes, not read from
+16. **The `52+32N` / `64+56N` decomposition is inferred from sizes, not read from
     a header.** No `b00` payload was opened. The decomposition is exact on 23 of
-    23 stems in this slice and fails on 38 of 122 stems matrix-wide (§6.5), so
-    it is a strong size-level regularity, not a parsed ELF fact [I].
+    23 stems in this slice and on **122 of 122** stem names matrix-wide (§6.5),
+    so it is a strong size-level regularity, not a parsed ELF fact [I].
 
-17. **`N − segments` is not explained.** §6.5 shows it is 0, 1, 3 or 6 depending
-    on the stem, and reads the residual as `PT_NULL`/hash/certificate headers.
-    That reading is not verified against a program-header table [I]/[N].
+17. **`N − segments` is not explained for the ELF32 stems.** §6.5 shows it is 0,
+    1 or 3 there and reads the residual as `PT_NULL`/hash/certificate headers;
+    every ELF64 stem has a residual of exactly 0. That reading is not verified
+    against a program-header table [I]/[N].
 
 ## Reproduce
 
@@ -984,7 +995,7 @@ for st in stems:
     b0=d.get(st+'.b00')
     if b0 is None: continue
     e32,e64=b0-52,b0-64
-    f='ELF32 52+32*%d'%(e32//32) if e32>0 and e32%32==0 else ('ELF64 64+32*%d'%(e64//32) if e64>0 and e64%32==0 else 'neither')
+    f='ELF32 52+32*%d'%(e32//32) if e32>0 and e32%32==0 else ('ELF64 64+56*%d'%(e64//56) if e64>=0 and e64%56==0 else 'neither')
     print(st,b0,f)"
 ```
 
@@ -997,7 +1008,7 @@ b00={r['filename'][:-4]:int(r['size_bytes']) for r in rows if r['filename'].ends
 mdt={r['filename'][:-4]:int(r['size_bytes']) for r in rows if r['filename'].endswith('.mdt')}
 both=set(b00)&set(mdt)
 e32=sum(1 for s in both if b00[s]>52 and (b00[s]-52)%32==0)
-e64=sum(1 for s in both if b00[s]>64 and (b00[s]-64)%32==0)
+e64=sum(1 for s in both if b00[s]>=64 and (b00[s]-64)%56==0)
 print('stems',len(both),'e32',e32,'e64',e64,'neither',len(both)-e32-e64)"
 ```
 
@@ -1072,8 +1083,8 @@ All fetches 2026-11-22. `torvalds/linux` master at
 | 651 / 1 / 833,798,522 for `SM8350-AC`; 28 gpu + 38 modem rows | same | 2026-11-22 |
 | `OnePlus_9` 651 rows, blank `soc`, 581/589 md5 overlap | same | 2026-11-22 |
 | 23/23 split law; 15 self-contained stems; per-stem segment counts | same | 2026-11-22 |
-| `b00` decomposes `52+32N` on 8 stems, `64+32N` on 15, neither on 0; `32`/`64` suffix matches 7/7 | same | 2026-11-22 |
-| 122 stems matrix-wide with `.mdt`+`.b00`: 56 fit `52+32N`, 28 fit `64+32N`, 38 neither (cluster at `b00=568`) | same | 2026-11-22 |
+| `b00` decomposes `52+32N` on 8 stems, `64+56N` on 15, neither on 0; `32`/`64` suffix matches 7/7 | same | 2026-11-22 |
+| 122 stem names matrix-wide with `.mdt`+`.b00`: 49 fit `52+32N`, 73 fit `64+56N`, **0** neither | same | 2026-11-24 |
 | `.mbn` spellings 0 rows; `.mdt` spellings 1-2 rows | same | 2026-11-22 |
 | `a660_zap.b00/.b01/.b02` 3 rows each on `Moto_G200`/`Edge_30_Fusion`/`Edge_30` | same | 2026-11-22 |
 | `a660_gmu.bin` 3 builds / 19-device invariant; `a660_sqe.fw` 2 builds; `a660_zap.mdt` 11 builds | same | 2026-11-22 |

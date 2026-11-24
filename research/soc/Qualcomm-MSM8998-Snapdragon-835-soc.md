@@ -699,25 +699,31 @@ is the authority on the law's reach.
 | `modem` | 9,260 | 1,108 | 8,152 | 9,260 |
 | `slpi` | 8,380 | 756 | 7,624 | 8,380 |
 
-[F] `b00` size decomposes as an ELF header plus 32 B per program header:
-`52 + 32N` for ELF32, `64 + 32N` for ELF64. Across all 27 testable stems:
-**13 fit ELF32, 13 fit ELF64, and exactly one fits neither** — `cmnlib64`'s
-**400 B** (400 − 64 = 336, not a multiple of 32; 400 − 52 = 348, not either)
-[F, OPEN]. Worked examples: `cmnlib` 244 = 52+32·6; `smplap32` 308 = 52+32·8;
-`adsp` 532 = 52+32·15; `cdsp` 436 = 52+32·12; `slpi` 756 = 52+32·22;
-`modem` 1108 = 52+32·33; `spss1p` 148 = 52+32·3; `npu`/`venus` 212 = 52+32·5.
-The **thirteen** 512 B headers are all `64 + 32·14`, and they are the whole
-ELF64 side of the table.
+[F] `b00` size decomposes as an ELF header plus the program-header table:
+`52 + 32N` for ELF32, `64 + 56N` for ELF64. Across all 27 testable stems:
+**13 fit ELF32, 14 fit ELF64, and none fits neither.** Worked examples: `cmnlib`
+244 = 52+32·6; `smplap32` 308 = 52+32·8; `adsp` 532 = 52+32·15;
+`cdsp` 436 = 52+32·12; `slpi` 756 = 52+32·22; `modem` 1108 = 52+32·33;
+`spss1p` 148 = 52+32·3; `npu`/`venus` 212 = 52+32·5.
+The **fourteen** ELF64 headers are thirteen at `64 + 56·8` (= 512) plus
+`cmnlib64` at `64 + 56·6` (= 400), and they are the whole ELF64 side of the
+table.
 
-[F] That single exception is worth recording because the SM8350 note found **0
-non-fits on 23 stems** — so `.b00` size is not universally a clean
-header+phdr sum.
+[F] **Correction (2026-11-24, from `research/soc/Qualcomm-SM4375-Snapdragon-4-Gen-1-soc.md` §7.2):**
+this section previously stated `64 + 32N` for ELF64 and called `cmnlib64`'s
+400 B header the one non-fit. Both were wrong — an ELF64 program header is
+**56 bytes**, not 32. `400 = 64 + 56×6`, so `cmnlib64` fits the same law as
+every other ELF64 stem and shipped with **6** program headers and 6 segments.
+The corpus-wide test in #811 (§7.2) settles it in three parts: the 40 distinct
+`.b00` sizes partition cleanly with **0** ambiguous between the two formulae and
+**0** fitting neither; `phdr − nseg` is **never negative** across 1,314 stems;
+and all seven 400-byte `cmnlib64.b00` rows in the matrix are `nseg = 6`. The
+`.b00`-sized-512 rows read `64 + 56·8` with 8 segments — under the old constant
+they would have claimed 14 program headers for 8 segments, which is how the
+error stayed invisible.
 
-[F] `cmnlib64` is anomalous twice over. Its 400 B header is *not* the 512 B that
-every other 64-bit trustlet in this slice uses (thirteen do), and it is the only
-`*64` stem that fails both formulae. So the `64` suffix does **not**
-predict the ELF class here: `cmnlib64`'s header is neither the 52-byte ELF32
-base nor the 64-byte ELF64 base plus whole program headers [F, OPEN].
+[F] That the SM8350 note found **0 non-fits on 23 stems** is consistent with
+this: there is no exception to explain.
 
 ### 7.2 Code-segment variance is a perfect remoteproc detector — 34 of 34
 
@@ -933,9 +939,12 @@ SoC string and two disjoint sets of hardware.
 5. **`mdt == b00 + b01` on 27/27 is a two-device result, not a fleet law** [F, I].
    `tz.md` §5 shows the law fails on 190 of 399 fleet-wide. This slice is on the
    clean side because both its devices are one build.
-6. **I cannot explain `cmnlib64.b00 = 400`** [OPEN]. It fits neither
-   `52 + 32N` nor `64 + 32N`. Every other `.b00` in the slice fits one of the
-   two. Recorded, not resolved — resolving it needs the header.
+6. **`cmnlib64.b00 = 400` is now explained** [F] — see §7.1's correction box.
+   `400 = 64 + 56·6`, i.e. an ELF64 header plus six 56-byte program headers,
+   matching the stem's six segments. This item shipped as `[OPEN]` and is
+   resolved by `research/soc/Qualcomm-SM4375-Snapdragon-4-Gen-1-soc.md` §7.2
+   (2026-11-24), which found **0** non-fits across all 1,314 `.b00`-bearing
+   stems in the 33,917-row matrix.
 7. **`multiimgoem.img` and `uefisecapp.img` are 7T-only and unexplained** [OPEN].
    Both are tz-family, both single-device. I did not determine whether the 7
    genuinely lacks these partitions or the extraction missed them; a stock
@@ -1206,4 +1215,4 @@ curl -s "https://gitlab.com/api/v4/projects/postmarketOS%2Fpmaports/repository/f
 | `wpss`/`bdwlan` grammar, `b<NN> ≡ phdr NN`, board-id indexing | `research/fleet/wifi-wpss.md` §2-§4 | 2026-11-20 |
 | fleet CDSP census row: MSM8998 `2 devices / 22 rows / 11 files` | `research/cdsp-fleet/census.md:207` | 2026-11-20 |
 | `bm2n`/QCA BT patch fleet matrix | `research/laptop/qualcomm-adsp-bm2n-fleet.md`, `qualcomm-qca-bt-fleet.md` | 2026-11-20 |
-| SM8350 SoC-package house format; `.b00` = `52+32N`/`64+32N` with 0 non-fits on 23 stems; `qupfw` has no mainline binding | `research/soc/Qualcomm-SM8350-Snapdragon-888-soc.md` (its §1, §4, §6.5) | 2026-11-22 |
+| SM8350 SoC-package house format; `.b00` = `52+32N`/`64+56N` with 0 non-fits on 23 stems; `qupfw` has no mainline binding | `research/soc/Qualcomm-SM8350-Snapdragon-888-soc.md` (its §1, §4, §6.5) | 2026-11-24 |

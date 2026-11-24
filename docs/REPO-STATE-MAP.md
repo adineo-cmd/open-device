@@ -13,8 +13,8 @@ work committed, a named delta remains; **NEW** = no committed deliverable.
 |---|---:|---|---|
 | Firmware family doc | 1,107 | NEW | only stubs (`docs/devices/*/leverage-families.md`, "Deep-RE status: none yet") |
 | Device package | 245 | NEW | `research/devices/` does not exist |
-| SoC package | 27 | PARTIAL | 8 per-SoC GPU result docs under `research/soc/` plus 2 SoC-package notes (`Qualcomm-SM8350-Snapdragon-888-soc.md`, `Qualcomm-MSM8998-Snapdragon-835-soc.md`: CPU/DSP/boot-chain/TZ/firmware census); `per-soc-method-plans.md` is the plan they derive from |
-| CPU/SoC core ID | 27 | PARTIAL | 2 per-SoC CPU cluster maps in `research/soc/`: SM8350 (4×A55 + 3×A78 + 1×X1, one `cpu-map` cluster, three `freq-domain`s) and MSM8998 (4+4 Kryo 280, two clusters, `capacity-dmips-mhz` 1024/1536, MIDR `0x51008000`/`0x51008010` from `cputype.h` — no MIDR in the DT); 25 SoCs remain |
+| SoC package | 27 | PARTIAL | 8 per-SoC GPU result docs under `research/soc/` plus 3 SoC-package notes (`Qualcomm-SM8350-Snapdragon-888-soc.md`, `Qualcomm-MSM8998-Snapdragon-835-soc.md`, `Qualcomm-SM4375-Snapdragon-4-Gen-1-soc.md`: CPU/DSP/boot-chain/TZ/firmware census); `per-soc-method-plans.md` is the plan they derive from |
+| CPU/SoC core ID | 27 | PARTIAL | 3 per-SoC CPU core-ID sections in `research/soc/`: SM8350 (4×A55 + 3×A78 + 1×X1, one `cpu-map` cluster, three `freq-domain`s), MSM8998 (4+4 Kryo 280, two clusters, `capacity-dmips-mhz` 1024/1536, MIDR `0x51008000`/`0x51008010` from `cputype.h` — no MIDR in the DT) and SM4375 (2×A78 + 6×A55 from public spec, two `freq-domain`s in the sibling DT; **no** SM4375 DT exists, so the MIDRs `0x410fd410`/`0x410fd050` are `cputype.h` arithmetic and instruction-level proof is recorded as absent); 24 SoCs remain |
 | GPU core ID | 27 | PARTIAL | 8 per-SoC GPU docs under `research/soc/`: MSM8998, SM4375, SM4350, SM7250, SM7325, SM8250, SM8350 (Adreno) + Google Tensor GS201 (Mali-G710, the first non-Adreno part); 19 SoCs remain |
 | Driver interface | 42 | PARTIAL | 10 FP6 interface docs under `research/qualcomm/docs/` |
 | Proprietary blob spec | 9 | PARTIAL | 6 families have committed format work |
