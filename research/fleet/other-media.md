@@ -149,9 +149,15 @@ same generation boundary.
 - **Entropy is not evidence.** The code segment measures 7.179 bits/byte, but it is
   heterogeneous (~156 KB code, ~760 KB data), so entropy cannot discriminate ISAs. It is
   reported and **not** used.
-- **`CAMERA_ICP` is out of local reach** — the local copies are `EM_ARM` (40), not 94. I make
-  **no** claim about the FP6 `CAMERA_ICP` ISA; only about `vpu20/30/33`, which is what this
-  issue's subfamily contains.
+- **`CAMERA_ICP` was out of local reach when this note was written, and is not now**
+  (corrected 2026-11-24 in `research/fleet/other-camera.md` §3). The copies this note had
+  were `EM_ARM` (40); the FP6 split set was not in the local tree, so no claim about the
+  FP6 `CAMERA_ICP` ISA was made. That question had in fact already been answered
+  elsewhere in the repo — `research/qualcomm/docs/fp6-architecture-census.md` lists
+  `CAMERA_ICP.mbn/.elf/.mdt` as `e_machine=94` `EM_XTENSA` and `CAMERA_ICP_170.elf` as
+  `ARM (40)`, and `results/census.md` L653–677 carries the same per-file labels. The
+  conclusion above about `vpu20/30/33`, which is what this issue's subfamily contains, is
+  unaffected and is confirmed from a different file in the same tree.
 - **The Black Hat 2019 deck does not say what the repo implies.** Full-text search of the
   PDF returns **0** hits for `IDA`, `disassem`, `decompil` and `drag`; the often-quoted
   "drag the firmware into IDA" line **is not in the deck**. The "ARM 32Bit" label sits beside
@@ -357,8 +363,10 @@ analysis: it has 4 distinct md5s (23-device dominant, a 6-device 20-byte variant
 
 - **No ISA proof from disassembly.** No Xtensa disassembler in this environment. §2 rests on
   registries and the kernel, not on decoded bytes of this image.
-- **`CAMERA_ICP` ISA not asserted.** The local copies are `EM_ARM`; the FP6 set the repo
-  discusses is not in the local tree.
+- **`CAMERA_ICP` ISA: not asserted here, closed elsewhere.** The copies available to this
+  note are `EM_ARM` (40), and the FP6 set was not in the local tree at the time. It is in
+  the tree now and is `e_machine=94` `EM_XTENSA`; the ISA verdict lives in
+  `research/fleet/other-camera.md` §3, not here.
 - **No runtime behaviour established.** Nothing here shows what the firmware does; 0 pointers
   to any document were checked, and no HFI exchange was traced.
 - **Matched-semantics words unresolved.** `w[19]` (`2` vs `258`), `w[20]`, `w[12..18]` are
