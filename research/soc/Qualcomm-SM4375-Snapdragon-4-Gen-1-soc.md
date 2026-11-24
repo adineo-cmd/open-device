@@ -126,14 +126,15 @@ arch/arm64/boot/dts/qcom/sm6375.dtsi
   cpu0..cpu7  compatible = "qcom,kryo660"     (all eight, identical string)
   cpu0..cpu5  clocks/freq-domain = <&cpufreq_hw 0>
   cpu6..cpu7  clocks/freq-domain = <&cpufreq_hw 1>
-  cpu-map     cluster0 { core0..core5 }  cluster1 { core6, core7 }
+  cpu-map     cluster0 { core0..core7 }       (ONE cluster, all eight)
 ```
 
-So the DT encodes the 6+2 split **three ways** — `freq-domain`, `cpufreq_hw`
-clock index, and `cpu-map` cluster — while giving **one** `compatible` string to
-two physically different core types. A consumer that derives cluster structure
-from `compatible` sees a homogeneous 8-core machine; a consumer that reads
-`cpu-map` sees 6+2 [F].
+So the DT encodes the 6+2 split **two ways** — `freq-domain` and the
+`cpufreq_hw` clock index — while giving **one** `compatible` string to
+two physically different core types, and folding both clusters into a single
+`cpu-map` cluster. A consumer that derives cluster structure from `compatible`
+sees a homogeneous 8-core machine; a consumer that reads `cpu-map` sees the same
+thing; only `freq-domain` carries the 6+2 [F].
 
 Now compare `sm4450.dtsi`, which is the same 6+2 shape but resolves the core
 types honestly [F]:
@@ -149,22 +150,34 @@ Three structural facts, all [F]:
 
 | SoC | cores | `compatible` | `cpu-map` clusters | `capacity-dmips-mhz` |
 |---|---|---|---|---|
-| `sm6375` | 8 | `qcom,kryo660` ×8 | **2** (`cluster0`, `cluster1`) | **none** |
+| `sm6375` | 8 | `qcom,kryo660` ×8 | **1** (`cluster0`, all 8 cores) | **none** |
 | `sm4450` | 8 | `arm,cortex-a55` ×6, `arm,cortex-a78` ×2 | **1** | **none** |
 | SM4375 | 8 | **no DT** | **no DT** | **no DT** |
 
-So the two closest published 6+2 SoCs disagree with each other on *both*
-`compatible` style and cluster count. Predicting SM4375's DT from either would
-be a guess [H]. What can be said is that SM4375's cores are stock ARM parts
-(§1.2), so the `sm4450` style — `arm,cortex-a78` / `arm,cortex-a55` — is the
+So the two closest published 6+2 SoCs agree on cluster count and disagree on
+`compatible` style. Predicting SM4375's DT from either would be a guess [H].
+What can be said is that SM4375's cores are stock ARM parts (§1.2), so the
+`sm4450` style — `arm,cortex-a78` / `arm,cortex-a55` — is the
 better-motivated of the two, and the `sm6375` style would be a
 misdescription [I].
+
+> Correction (2026-11-24, #847): this table previously recorded `sm6375` as
+> having **2** `cpu-map` clusters. Current master has **one** `cluster0`
+> holding `cpu0`–`cpu7` (`sm6375.dtsi:214-248`); the only `cluster1` tokens in
+> the file are thermal zones at `:2042`–`:2058`. The shape is stable across
+> every tag that carries the file (`v6.2`–`v6.13`, master); `v6.0` and `v6.1`
+> do not have it. The vendor `blair.dtsi` for SM4375 does use two clusters, so
+> the two-cluster shape was right about *a* `sm6375`-family SoC, just not about
+> mainline's file. See `Qualcomm-SM4375-Snapdragon-4-Gen-1-cpu.md` §7.2.
 
 Note the `capacity-dmips-mhz` column: **neither** sibling carries it, while
 MSM8998 does (`1024` / `1536`). For a 6+2 with a single `cpu-map` cluster the
 kernel derives capacity from `freq-domain`; the explicit hint is unnecessary.
 That is consistent with `sm8350.dtsi` too, which uses one `cpu-map` cluster and
-three `freq-domain`s with no dmips hints [F].
+three `freq-domain`s with no dmips hints [F]. The vendor `blair.dtsi` for
+SM4375 does carry the hint (`1024` ×6 / `1946` ×2) despite having two
+`cpu-map` clusters — so the presence of the hint tracks the vendor tree, not
+the cluster count.
 
 ### 1.4 Machine identity: the SoC ID does not exist
 
