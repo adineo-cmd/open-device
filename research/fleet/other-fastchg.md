@@ -655,8 +655,9 @@ consistent with §6.3's "`_FAE` is the body."
 
 ### 7.1 `LIMITIMG` is a second, separate container `[F]`
 
-The 41 `LIMIT_*` files on disk are not `FwUp` at all. All 41 begin `4c 49 4d 49`
-= `LIMI`, i.e. `LIMITIMG`:
+The 41 `LIMIT_*` files in `larry`'s `firmware/tp/` are not `FwUp` at all. All 41
+begin `4c 49 4d 49` = `LIMI`, i.e. `LIMITIMG` (a further 15 such files in
+`instantnoodle` do too — see `other-oled.md` §7.1):
 
 ```
 LIMITIMG <u32@0x08> 0  <offset table…>
@@ -664,17 +665,32 @@ sec@0x4c: 4f 50 50 4f 84 00 00 00 01 00 00 00 cc 00 00 00 …
           O  P  P  O  <len>  <ver>  <…>
 ```
 
-The body is a **section table** of 11 little-endian `u32` offsets beginning at
-`0x10`, followed by sections whose first bytes are the ASCII tag `OPPO`.
+The body is a **record table** whose length is declared at `0x10`, followed by
+records whose first bytes are the ASCII tag `OPPO` or `SLPO`.
 
-`[N]` The section table did **not** validate uniformly. Testing "offsets
-strictly ascending AND last offset < filesize" passes on **24 of 41** files. The
-offset tuples cluster into 12 distinct shapes, the largest group being 10 files
-sharing one tuple starting `[64, 4696, 9328, …]`. On 8 files the tuple contains
-values like `1330663503` that cannot be an offset — so for those, what I read as
-the table is not the table (the header is longer, or the table is not at `0x10`).
-**`LIMITIMG` is therefore only partly decoded.** I state the magic, the section
-tag and the 11-word offset region as `[F]`; the full layout is `[U]`.
+**Correction (2026-11-24).** An earlier version of this section claimed the table
+was "11 little-endian `u32` offsets" and that the format validated on only
+**24 of 41** files. That was wrong, and the error was mine: I had assumed a fixed
+11-entry table instead of reading the count. The count is variable and
+derivable — `count = (u32@0x10 − 0x10) / 4` — and **no file has 11 records**:
+per-file counts are `5×3, 7×11, 8×2, 10×1, 12×11, 14×1, 15×11, 20×1`. With the
+correct rule every check passes:
+
+| check | result |
+|---|---|
+| magic `LIMITIMG` | **41 / 41** |
+| `table[0] == 0x10 + 4 × count` | **41 / 41** |
+| offset table monotonic | **41 / 41** |
+| record span `u32@rec+4 == next − this` | **408 / 408** |
+| last record ends at EOF | **41 / 41** |
+
+**449 records** in total, magics `OPPO` **367** / `SLPO` **82**. `[F]`
+
+This is the same conclusion `research/fleet/other-touch.md` §6.1–6.5 reached for
+the same 41 files, and that note was correct before this one. My "24/41" figure
+came from testing a fixed-width 11-entry window, which is why 17 files failed —
+not because the container resists decoding. The record layout *beyond*
+`magic(4) + span(4)` remains `[U]`, exactly as `other-touch.md` §6.3 says.
 
 Sizes span 9,324–117,312 B across 11 distinct values, and the 41 files are small
 next to their `FW_` siblings — e.g. `S3910_TIANMA` is 15,836 B as `LIMIT_` versus
@@ -763,8 +779,10 @@ a different container with a different internal layout.
   found. `[N]`
 
 Accordingly the whole of §6 is derived from bytes plus arithmetic closure. Where
-closure is not exact I say so: `LIMITIMG` (§7.1) is only partly decoded, header
-`0x04` (§6.5) is unresolved, and the `rk826` inner prefix (§8.1) is not decoded.
+closure is not exact I say so: header `0x04` (§6.5) is unresolved and the `rk826`
+inner prefix (§8.1) is not decoded. (`LIMITIMG` in §7.1 was wrongly listed here
+as "only partly decoded"; it closes 41/41 on the correct rule and has since been
+corrected in place — see that section.)
 
 ### 9.2 The flash-memory payloads are not on disk `[N]`
 
@@ -838,9 +856,12 @@ adds no information beyond the subfamily name for the other 305.
    and the `21221` counter-example were found rather than left as a false 37/37.
 4. **Every number re-derived before writing.** Percentages are recomputed and
    asserted to sum to 100.00 (table, §2); sub-counts are asserted to sum to
-   totals (192 = 100+80+12; 82 = per-name sum; 31 flash rows). Where a count did
-   **not** reconcile I say so rather than rounding it away — that is why §7.1
-   reports `24/41` for `LIMITIMG` instead of an 11-section story.
+   totals (192 = 100+80+12; 82 = per-name sum; 31 flash rows). This step is not
+   decorative: it is what caught four wrong figures before commit (94.34% →
+   95.04%, `_FAE` 37/37 → 36/37, `LIMIT_` max 25,980 → 117,312 B, and the
+   `f0 bd` offset). The `LIMITIMG` "24/41" in the first version of §7.1 was the
+   one that got past it, and it is corrected in place there and re-derived as
+   41/41.
 5. **Negative tests are run and reported.** Eight digest algorithms × four input
    arrangements × forwards/reversed for the trailer (§6.5) — reported as 0/80
    rather than as "probably a signature." The `find` for the flash payloads
@@ -848,6 +869,9 @@ adds no information beyond the subfamily name for the other 305.
 6. **No disassembler, no ISA claim.** §8.2. Vector-table tests are shape tests,
    marked `[I]` per file; `isa_identified` is left blank.
 7. **Rule 1 was checked, and there was nothing to correct.** See §10.1.
+   *(Amended 2026-11-24: one correction was owed — to myself. §7.1's
+   `LIMITIMG` "24/41" was wrong and is fixed in place; `other-touch.md`'s
+   §6 was right all along.)*
 
 ### 10.1 Rule 1 check
 
