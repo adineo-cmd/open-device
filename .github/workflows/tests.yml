@@ -1,0 +1,44 @@
+name: tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  repository-checks:
+    name: self-tests and repository checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install tool dependencies
+        run: python3 -m pip install -r requirements.txt
+      - name: Run all component self-tests
+        run: python3 tools/run_all_tests.py
+      - name: Check stale repository names
+        run: python3 tools/check_stale_names.py
+      - name: Validate issue catalogs
+        run: python3 tools/check_catalogs.py
+      - name: Check state-map artifact paths
+        run: python3 tools/check_state_map.py
+
+  site-check:
+    name: website type/build check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - name: Install site dependencies
+        run: npm ci
+      - name: Astro check
+        run: npm run check

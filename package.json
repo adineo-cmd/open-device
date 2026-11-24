@@ -11,5 +11,10 @@
   },
   "dependencies": {
     "astro": "^5.16.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@types/node": "^26.6.6",
+    "typescript": "^5.9.3"
   }
 }

@@ -2,7 +2,7 @@ import csv, json, os
 from collections import defaultdict
 
 BASE = "/home/aditya/.zcode/workspace/draft-edfb884f-51a0-40a6-ae53-6cf6375c0730"
-REPO = os.path.join(BASE, "librephone-blob-research")
+REPO = os.path.join(BASE, "open-device")
 BD = os.path.join(REPO, "upstream-contribution", "blob-database")
 OUTDIR = os.path.join(REPO, "blob-matrix", "desktop")
 os.makedirs(OUTDIR, exist_ok=True)

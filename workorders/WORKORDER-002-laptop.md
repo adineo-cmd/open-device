@@ -1,9 +1,9 @@
 # WORKORDER-002 — LAPTOP agent program (v3)
 
-**Machine:** LAPTOP · **Agent budget:** ~300M tokens · **Repo:** `librephone-blob-research` (this clone)
+**Machine:** LAPTOP · **Agent budget:** ~300M tokens · **Repo:** `open-device` (this clone)
 **Issued:** 2026-11-16 (v3) by the Open Discovery Lab lead · **Duration:** one full agent session
 **Repo roles (standing):**
-- `librephone-blob-research` — LibrePhone work. **PRIORITY 1 on BOTH machines.**
+- `open-device` — LibrePhone work. **PRIORITY 1 on BOTH machines.**
 - `open-research-lab` — mathematics and other fields. PRIORITY 2.
 - `open-discovery-lab` — the NOTEBOOK (findings from any repo; lead-merged).
 

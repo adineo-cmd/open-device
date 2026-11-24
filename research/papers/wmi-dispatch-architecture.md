@@ -1,6 +1,6 @@
 # The WMI dispatch architecture of the WCN6750 wpss firmware: a two-level, table-driven dispatcher decoded from Hexagon machine code
 
-**Research note, librephone-blob-research — 2026-11-12.**
+**Research note, open-device — 2026-11-12.**
 Synthesis of Open Discovery Lab findings F-9 → F-29 (2026-11-09 to 2026-11-11); every number below traces to a committed finding document (Appendix A).
 
 **One-line claim.** The Fairphone FP6's WCN6750 WiFi firmware dispatches WMI events through two table-driven levels — a static `[handler-pointer, grp<<12|cmdID, 0]` registry in data segment `wpss.b09` that routes WMI groups to Hexagon dispatcher functions in code segment `wpss.b06`, and b06-resident computed jump tables that route event IDs to per-event handler blocks — a structure reached only after two falsifications and one architecture correction, and described nowhere in public literature at decode level.

@@ -9,7 +9,7 @@ the F-51 parser), F-52 (synthesis), F-58 (pulse allocator), F-68 (100 %
 bit-economy closure: 94,600 LP + 313 SP subframes) — spec docs:
 open-discovery-lab track-c-discovery-engine/docs/lpec-*.md and
 results/format-re/lpec-census/. Re-homed 2026-11-16 into
-librephone-blob-research/implementations/lpec/ as a standalone component
+open-device/implementations/lpec/ as a standalone component
 (code unchanged from commit 2b394a1 except this header). No proprietary
 material (no Sony binaries, no decompiled code) was accessed during
 development — the codec facts were derived by static analysis and

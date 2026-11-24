@@ -10,7 +10,7 @@
 > e_machine 164 per the mdt), not RISC-V — the RISC-V core runs the QURT
 > application firmware (`wpss.b07`); the message-ID registry is in
 > `wpss.b09` (149 distinct IDs, anchor `0xc0691080`). Full research note:
-> [`papers/wmi-dispatch-architecture.md`](https://github.com/adineo-cmd/librephone-blob-research/blob/main/papers/wmi-dispatch-architecture.md).
+> [`papers/wmi-dispatch-architecture.md`](https://github.com/adineo-cmd/open-device/blob/main/papers/wmi-dispatch-architecture.md).
 > The `docs/fp6-riscv-cores.md` suggestion below is folded into the
 > package: the ICP/VPU e_machine=94 finding stays in
 > `qualcomm-fp6/docs/fp6-architecture-census.md` and is referenced from
@@ -46,7 +46,7 @@ Proposed replacement:
 
 Also suggested: a new short doc documenting the camera ICP and VPUs. The
 architecture label must be **Xtensa**, not RISC-V — see
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/fp6-architecture-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/fp6-architecture-census.md
 and issue #2058:
 
 > The camera ICP firmware (`CAMERA_ICP.mbn/.elf/.mdt`,

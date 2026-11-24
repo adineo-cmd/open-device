@@ -1,6 +1,6 @@
 # Second Device Population — OnePlus Nord CE 3 Lite 5G / Nord N30 5G (`larry`, SM6375)
 
-WORKORDER-001 desktop session, second-device population. This is the lab's first SM6xxx-generation census. Raw artifacts stay local under `data-fetch/second-device/larry/`; census lives at `analysis/out/second-device-census.csv`. Nothing was committed to `librephone-blob-research/`.
+WORKORDER-001 desktop session, second-device population. This is the lab's first SM6xxx-generation census. Raw artifacts stay local under `data-fetch/second-device/larry/`; census lives at `analysis/out/second-device-census.csv`. Nothing was committed to `open-device/`.
 
 ## Device chosen and why
 

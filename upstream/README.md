@@ -105,7 +105,7 @@ dispatch architecture of this firmware is documented in a follow-up PR
 in wpss.b06, while the RISC-V core runs the QURT application firmware.
 
 Census write-up with the full evidence chain:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/fp6-architecture-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/fp6-architecture-census.md
 ```
 
 **Doc change (paste-ready replacement paragraph for the "Wireless
@@ -132,7 +132,7 @@ for the decoded WMI dispatch architecture (the event-routing code is
 Hexagon in `wpss.b06`).
 
 Census write-up with the full evidence chain:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/fp6-architecture-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/fp6-architecture-census.md
 ```
 
 ---
@@ -182,7 +182,7 @@ trace-string table (66 of 11,244 file.c: strings name WMI IDs).
 
 Full write-up (method, tools, complete decoded map, falsification
 chain):
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/papers/wmi-dispatch-architecture.md
+https://github.com/adineo-cmd/open-device/blob/main/papers/wmi-dispatch-architecture.md
 ```
 
 **Doc content (paste-ready, the whole new file):**
@@ -340,7 +340,7 @@ alignment predicts.
 
 Full write-up with the complete falsification chain, tools and result
 JSONs:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/papers/wmi-dispatch-architecture.md
+https://github.com/adineo-cmd/open-device/blob/main/papers/wmi-dispatch-architecture.md
 ```
 
 ---
@@ -394,7 +394,7 @@ the original observations and adds verified facts:
 
 No blob content is redistributed; all numbers are derived metadata.
 Full write-up:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/papers/wmi-dispatch-architecture.md
+https://github.com/adineo-cmd/open-device/blob/main/papers/wmi-dispatch-architecture.md
 ```
 
 **Doc content (paste-ready, per file):**
@@ -425,7 +425,7 @@ the per-group WMI event dispatchers. The PDEV-family dispatcher at
 event-to-handler map.
 
 Full write-up:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/papers/wmi-dispatch-architecture.md
+https://github.com/adineo-cmd/open-device/blob/main/papers/wmi-dispatch-architecture.md
 ```
 
 `docs/wpss.b07.md` — append:
@@ -439,7 +439,7 @@ The RISC-V identification is confirmed beyond the tool disagreement:
   entry `0x404000`. The entry code disassembles (capstone, RV32+RVC) as
   machine-mode startup: build an MIE mask, `csrs mstatus`, `csrci
   mstatus`, then `csrw mtvec`. Annotated first-250-instruction listing:
-  https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/wpss-b07-disasm-head.md
+  https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/wpss-b07-disasm-head.md
 - The "total garbage" blocks in the objdump output are the zero-filled
   padding and data regions between real functions — a full linear sweep
   of the pure-code LOADs decodes at 100% coverage (24,030 instructions),
@@ -516,7 +516,7 @@ code. See `docs/wmi-dispatch.md` for the full dispatch architecture and
 the decoded event map.
 
 Full write-up:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/papers/wmi-dispatch-architecture.md
+https://github.com/adineo-cmd/open-device/blob/main/papers/wmi-dispatch-architecture.md
 ```
 
 `docs/wpss.b10.md` — append:
@@ -579,8 +579,8 @@ nightly (2026-11-09):
   key ("T2MO OEM Key", Amsterdam).
 
 Census write-ups (facts only, no blob content):
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/bt-firmware-census.md
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/bootchain-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/bt-firmware-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/bootchain-census.md
 ```
 
 **Doc content (paste-ready):**

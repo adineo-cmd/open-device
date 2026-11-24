@@ -66,7 +66,7 @@ flowchart LR
 
 ## Quick start
 
-Python 3.10+, `capstone` for disassembly. You supply your own device dump; none is in this repository.
+Python 3.10+, `capstone` for disassembly (`python3 -m pip install -r requirements.txt`). You supply your own device dump; none is in this repository.
 
 **Qualcomm — Fairphone FP6**
 
@@ -98,6 +98,10 @@ src/              the Astro website (npm run build -> dist/)
 site/             the original Python generator, kept as provenance (not deployed)
 AGENTS.md         standing rules, including the issue-claim protocol (Rule 2)
 SCOPE.md          legal and ethical boundary
+CONTRIBUTING.md   human contributor quick path
+BRANCHING.md      branch policy: PRs go to feat/open-device-site, never main
+ROADMAP.md        coverage, gaps and definitions of done
+LICENSE*          GPL-2.0-only code / CC BY-SA 4.0 docs and data
 ```
 
 ## Website
@@ -111,6 +115,25 @@ device, plus firmware-fleet and deep-RE packages). Read `docs/ISSUE-WORKFLOW.md`
 for the claim protocol and harness partition, then claim one with a `CLAIM`
 comment before touching its files. The catalog is
 `docs/issue-catalog/device-packages.jsonl`; Rules 2 and 3 in `AGENTS.md` are binding.
+
+## Development
+
+One command runs every committed self-test (Python unittest suites, the
+`historic/fp2` harness, the C self-tests and `site/tests/`):
+
+```bash
+python3 tools/run_all_tests.py
+python3 tools/check_stale_names.py     # post-rename reference check
+python3 tools/check_catalogs.py        # JSONL schema and drift check
+python3 tools/check_state_map.py       # dangling artifact paths
+```
+
+The same checks plus `npm run check` run in CI on every push and PR. New
+findings should start from `research/_template/finding.md`; open questions are
+indexed in `research/OPEN-QUESTIONS.md` and corrections in
+`research/CORRECTIONS.md`. Coverage and next steps are in `ROADMAP.md`.
+See `CONTRIBUTING.md` for the human path and `BRANCHING.md` for where to send
+a PR.
 
 ## Two findings worth the trip
 

@@ -15,7 +15,7 @@ Totals (F): 220 hash slots verified (178 exact digest hits + 42 zero slots), 35 
 
 ## 1. Inputs (sha256, F)
 
-11 enchilada partitions (cmnlib, cmnlib64, keymaster, devcfg, hyp, aop, abl, qupfw, storsec, xbl, xbl_config) were dumped this session from `data-fetch/enchilada/payload.bin` with `librephone-blob-research/qualcomm-fp6/tools/payload_dump.py`. boot.img/recovery (Android bootimg) excluded as out of scope; no bootimg magic was encountered in the swept set.
+11 enchilada partitions (cmnlib, cmnlib64, keymaster, devcfg, hyp, aop, abl, qupfw, storsec, xbl, xbl_config) were dumped this session from `data-fetch/enchilada/payload.bin` with `open-device/qualcomm-fp6/tools/payload_dump.py`. boot.img/recovery (Android bootimg) excluded as out of scope; no bootimg magic was encountered in the swept set.
 
 | file | size | sha256 | SoC |
 |---|---|---|---|

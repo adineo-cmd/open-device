@@ -74,7 +74,7 @@ stated in any public data I could reach, so the doc anchors on the
 mainline nxp-nci interface and flags the chip identity as open.
 
 Interface doc:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/interface-nfc.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/interface-nfc.md
 ```
 
 ### Q-2 — issue #18 ("Document the interface between the cellular radio driver and the blob")
@@ -107,9 +107,9 @@ disassembly capacity, same lever as the lab's I-4 item. The doc
 states this rather than guessing.
 
 Interface doc:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/interface-cellular.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/interface-cellular.md
 Modem/wpss blob census (sizes, hashes, ISA):
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/results/census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/results/census.md
 ```
 
 ### Q-3 — issue #26 ("Document the CopyEngine API")
@@ -143,9 +143,9 @@ DMA path) — one correction to the premise plus the API facts:
   IDs / 61 decoded events).
 
 Interface doc:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/interface-copyengine.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/interface-copyengine.md
 WMI dispatch spec (firmware side):
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/papers/wmi-dispatch-architecture.md
+https://github.com/adineo-cmd/open-device/blob/main/papers/wmi-dispatch-architecture.md
 ```
 
 ### Q-4 — issue #37 ("Figure out which WPSS blob is the PCIe bridge")
@@ -175,9 +175,9 @@ changes the question usefully:
   queue; binaries referenced below by size/hash.
 
 Census write-up (wpss segment table, sizes, hashes):
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/fp6-architecture-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/fp6-architecture-census.md
 PCIe-bridge note:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/interface-pcie-bridge.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/interface-pcie-bridge.md
 ```
 
 ### Q-5 — issue #39 ("What is the Gunyah hypervisor used for ?")
@@ -210,9 +210,9 @@ Short answer from public sources + the FP6 census:
   boot-log↔image work on hardware.
 
 Hypervisor note:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/interface-gunyah.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/interface-gunyah.md
 Boot-chain census (pvmfw/vbmeta_system facts):
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/bootchain-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/bootchain-census.md
 ```
 
 ### Q-6 — issue #40 ("Resolve differences between readelf and mdt_loader.c")
@@ -246,7 +246,7 @@ drivers/soc/qcom/mdt_loader.c:
   decodes noise.
 
 Note doc (step-by-step mechanism + test hooks):
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/interface-mdtloader-vs-readelf.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/interface-mdtloader-vs-readelf.md
 ```
 
 ### Q-7 — issues #44 and #45 ("FTM instrumentation" / "Expand the FTM doc")
@@ -280,7 +280,7 @@ FTM mode (con_mode_ftm / adb reboot ftm) and read the blob's echo.
 Layer-3/4 instrumentation can also synthesize payloads in-kernel.
 
 Doc (table + mechanics + what upstream ftm.md does not yet carry):
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/interface-ftm-diag.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/interface-ftm-diag.md
 ```
 
 For #45, post the same comment with the first line replaced by:
@@ -321,7 +321,7 @@ QMMI (the factory test harness — not public):
   QMMI sockets first).
 
 Survey doc:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/interface-qmmi-diag.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/interface-qmmi-diag.md
 ```
 
 ---

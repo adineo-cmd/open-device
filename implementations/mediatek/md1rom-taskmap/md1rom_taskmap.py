@@ -5,13 +5,13 @@ md1rom modem image's documented task interface and dispatch structure.
 ======================================================================
 CLEAN-ROOM STATEMENT
 Written from the lab's published spec documents on 2026-11-16:
-  - librephone-blob-research/mediatek/docs/md1rom-decode.md (F-31): the
+  - open-device/mediatek/docs/md1rom-decode.md (F-31): the
     byte-verified entry chain, decode-density region map, version strings
     and auto-analysis facts for md1rom (MOLY LR13, MIPS32 LE + MIPS16e).
-  - librephone-blob-research/mediatek/rosemary-census.md: the md1img
+  - open-device/mediatek/rosemary-census.md: the md1img
     payload manifest, per-payload container/signedness facts, and the
     MOLY version-string table.
-  - librephone-blob-research/mediatek/docs/md1dsp-decode.md (F-36) and
+  - open-device/mediatek/docs/md1dsp-decode.md (F-36) and
     docs/md32-gap.md (F-45): the modem L1/PHY task-name strings (LTE /
     HSPA / CDMA2000 families) recovered at decode level from the same
     MOLY LR13 package.

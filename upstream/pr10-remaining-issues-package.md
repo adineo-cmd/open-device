@@ -110,9 +110,9 @@ Interface note from the FP6 census + mainline kernel sources
   doc below lists all six.
 
 Interface doc (full table + header decode + test hooks):
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/interface-bt-driver.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/interface-bt-driver.md
 Blob census (sizes, hashes, first public ISA identification of this family):
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/bt-firmware-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/bt-firmware-census.md
 ```
 
 ## R-2 — issue #19 ("Identify what code is run in user space vs loaded firmware")
@@ -172,11 +172,11 @@ One honest open point: the modem blob's internal process structure
 disassembly capacity and is stated as open rather than guessed.
 
 Split-table doc:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/userspace-vs-firmware-split.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/userspace-vs-firmware-split.md
 ISA map:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/fp6-architecture-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/fp6-architecture-census.md
 Boot-chain census:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/bootchain-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/bootchain-census.md
 ```
 
 ## R-3 — issue #36 ("Identify blobs in radio directory")
@@ -227,9 +227,9 @@ census:
    them beyond filenames — same gap your track.md already flags).
 
 Boot-chain census (containers, ISA claims, hashes, cert-chain facts):
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/bootchain-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/bootchain-census.md
 TrustZone census (tz/hyp/keymaster/cmnlib/... structure):
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/trustzone-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/trustzone-census.md
 ```
 
 ## R-4 — issue #35 ("Document how signed blobs get loaded")
@@ -278,9 +278,9 @@ this platform:
   above, the hash-segment format, and the AVB descriptor walk.
 
 Boot-chain census (signing chain, cert subjects, AVB descriptors):
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/bootchain-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/bootchain-census.md
 mdt-loader mechanics note:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/interface-mdtloader-vs-readelf.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/interface-mdtloader-vs-readelf.md
 ```
 
 ## R-5 — issue #56 ("Misunderstanding of HIF")
@@ -311,10 +311,10 @@ documented from the FP6 firmware:
   b01/b02/b03/b05, queued with binaries by size/hash.
 
 WMI dispatch spec:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/papers/wmi-dispatch-architecture.md
+https://github.com/adineo-cmd/open-device/blob/main/papers/wmi-dispatch-architecture.md
 Transport/interface notes:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/interface-pcie-bridge.md
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/interface-copyengine.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/interface-pcie-bridge.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/interface-copyengine.md
 ```
 
 ---

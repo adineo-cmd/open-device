@@ -4,6 +4,12 @@ Generated 2026-11-20 from `git rev-parse HEAD` and the committed tree. This is
 the reference for Gate -1: before any issue is worked, its family row says what
 already exists and what is actually missing.
 
+> **Maintenance note:** this is a dated human snapshot, not a generated report.
+> `tools/check_state_map.py` verifies that the artifact paths quoted below still
+> resolve in the checkout and runs in CI; it cannot regenerate the verdicts.
+> Refresh the table after material coverage changes, and update `ROADMAP.md` and
+> `research/OPEN-QUESTIONS.md` at the same time.
+
 Verdicts: **DONE** = deliverable present and tested; **PARTIAL** = substantial
 work committed, a named delta remains; **NEW** = no committed deliverable.
 

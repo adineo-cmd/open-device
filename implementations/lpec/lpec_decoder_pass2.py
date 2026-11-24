@@ -8,7 +8,7 @@ F-49 (SP layout / MSB-first bit pump; THIS file is the pass-2 parser,
 distinct from the F-51 parser lpec_decoder.py), F-51, F-52, F-58, F-68
 (100 % bit-economy closure) — spec docs: open-discovery-lab
 track-c-discovery-engine/docs/lpec-*.md and results/format-re/lpec-census/.
-Re-homed 2026-11-16 into librephone-blob-research/implementations/lpec/
+Re-homed 2026-11-16 into open-device/implementations/lpec/
 as a standalone component (code unchanged from commit 778f9a8 except this
 header). No proprietary material (no Sony binaries, no decompiled code)
 was accessed during development — codec facts are derived facts only

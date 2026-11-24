@@ -6,7 +6,7 @@
 
 **Source:** OnePlus 6 (enchilada) `modem.img` → FAT16 volume → `IMAGE/BDWLAN.*`
 directory entries. Extracted with
-`librephone-blob-research/blob-matrix/desktop/tools/fat_extract.py` to
+`open-device/blob-matrix/desktop/tools/fat_extract.py` to
 `/tmp/modem-fat3`. Machine-readable companion:
 `analysis/out/bdwlan-variants.json` (md5 clusters, full RLE variability map,
 per-IE stats, aligned cluster/pair diffs, entropy blocks, strings).
@@ -259,7 +259,7 @@ No checksum or CRC field identified:
 ## 11. Reproduction
 
 ```sh
-python3 -I librephone-blob-research/blob-matrix/desktop/tools/fat_extract.py \
+python3 -I open-device/blob-matrix/desktop/tools/fat_extract.py \
     data-fetch/enchilada/modem.img /tmp/modem-fat3
 python3 -I analysis/tools/bdwlan_probe.py  /tmp/modem-fat3 analysis/out/bdwlan-variants.json
 python3 -I analysis/tools/bdwlan_tlv_probe.py /tmp/modem-fat3

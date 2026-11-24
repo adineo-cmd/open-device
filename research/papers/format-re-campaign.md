@@ -1,6 +1,6 @@
 # Four legacy formats decoded and one database encryption completely cracked in three sessions: the format-RE campaign (F-34 → F-39)
 
-**Research note, librephone-blob-research — 2026-11-13.**
+**Research note, open-device — 2026-11-13.**
 Synthesis of Open Discovery Lab findings F-34 → F-39 (Track C discovery engine, sessions of 2026-11-12; the campaign ran in [adineo-cmd/open-discovery-lab](https://github.com/adineo-cmd/open-discovery-lab), which holds the full evidence chain). Every number below traces to a committed source document (Appendix A).
 
 **One-line claim.** Mining the dexvert registry's "no known converter" notes as a scored target queue, the lab produced in three 2026-11-12 sessions the first public standalone decoder and format spec for ProLine Voice Data (Amiga BBS voicemail), the first public structural write-up of the Instant Graphics and Sound BBS protocol (Atari ST 640×200 space, 12/12 validated), a byte-exact 8/8 resolution of the Professional Draw clip container, and a 49-file corpus validation of Clarion .DAT with four spec corrections and a complete 6/6 crack of its header-and-record encryption with the 1991 contents recovered — plus a container census of Sony DVF/MSV voice-recorder files with a previously undocumented bitrate relation; the LPEC/TRC audio codec itself and queue items R-5..R-12 remain open.

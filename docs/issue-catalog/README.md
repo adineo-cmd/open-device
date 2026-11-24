@@ -26,4 +26,4 @@ Generated deterministically from the committed CSVs and Markdown corpus.
 Total: 2836 atomic issues.
 
 Each issue body carries the claim protocol from `docs/ISSUE-WORKFLOW.md`.
-Published to `adineo-cmd/librephone-blob-research` with label routing.
+Published to `adineo-cmd/open-device` with label routing.

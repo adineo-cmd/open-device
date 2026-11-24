@@ -1,6 +1,6 @@
 # Third Device Population — OnePlus 8 (`instantnoodle`, SM8250) — VOOC fast-charge pair proven byte-for-byte
 
-WORKORDER-001 desktop session, third-device population and leverage-entry proof. Raw artifacts stay local under `data-fetch/second-device/instantnoodle/`; census lives at `analysis/out/third-device-census.csv`, fleet join at `analysis/out/third-device-fleet-join.json`. Nothing was committed to `librephone-blob-research/`.
+WORKORDER-001 desktop session, third-device population and leverage-entry proof. Raw artifacts stay local under `data-fetch/second-device/instantnoodle/`; census lives at `analysis/out/third-device-census.csv`, fleet join at `analysis/out/third-device-fleet-join.json`. Nothing was committed to `open-device/`.
 
 ## Headline
 

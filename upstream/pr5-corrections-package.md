@@ -139,7 +139,7 @@ Verified facts that replace the AVR guess in both places:
   explain any wpss segment.
 
 Census write-up with the full evidence chain:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/fp6-architecture-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/fp6-architecture-census.md
 ```
 
 **Doc change (paste-ready):**
@@ -213,7 +213,7 @@ segments; older Qualcomm wireless firmware generations may still be
 L4-based — worth checking per-device rather than assuming either way.
 
 Full census:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/fp6-architecture-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/fp6-architecture-census.md
 ```
 
 ### C-2 — issues #43, #41, #42 (the three UUID-named blobs)
@@ -238,7 +238,7 @@ landed on 2026-11-03). Sizes for this build: FD719D50....b01 56,507 B;
 05B04A44....b01 48,626 B (+ .b02 257 B).
 
 Census write-up:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/trustzone-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/trustzone-census.md
 ```
 
 Post on #42 (32552B22-89FE-42B4-8A45-A0C4E2DB0326):
@@ -253,7 +253,7 @@ identifiable functionality, it will need disassembly rather than
 string evidence.
 
 Size/hash rows for every FP6 blob (including this one):
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/results/census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/results/census.md
 ```
 
 ### C-3 — issue #33 ("Identify what these shared libraries do")
@@ -283,9 +283,9 @@ QCA test-API libraries — the identified ones are QSEE trusted-app TAs
 
 So the guess "used for testing" holds only for smplap64; the rest are
 production TAs. Size/hash rows for all 16:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/results/census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/results/census.md
 TrustZone census:
-https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/trustzone-census.md
+https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/trustzone-census.md
 ```
 
 ---

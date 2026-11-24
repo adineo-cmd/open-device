@@ -18,17 +18,17 @@ methodology SLEIGH build).
 ======================================================================
 CLEAN-ROOM STATEMENT
 Written from the lab's published spec documents on 2026-11-16:
-  - librephone-blob-research/mediatek/docs/md1dsp-decode.md (F-36): DSP!
+  - open-device/mediatek/docs/md1dsp-decode.md (F-36): DSP!
     header field inventory (+0x0C size, +0x10 version, +0x18 marker,
     +0x1C chip id, +0x2C asic string, +0xAC build string, relative to the
     DSP! magic), sig_type=0 / load_addr=0xFFFFFFFF GFH values.
-  - librephone-blob-research/mediatek/docs/md32-gap.md (F-45) + results/
+  - open-device/mediatek/docs/md32-gap.md (F-45) + results/
     md32-gap.json: absolute offsets re-verified (magic @0x118, size @0x124,
     version @0x128, marker @0x134, chip @0x138, descriptor table @0x248
     with its three records, USIP tag @0x274 body @0x278 with two sample
     records, RAKE tag @0x4b4 with the six-record chain 0x58c814 -> 0x60a9d0
     and the documented crc32 constants).
-  - librephone-blob-research/mediatek/rosemary-census.md: the GFH MMM
+  - open-device/mediatek/rosemary-census.md: the GFH MMM
     record model and the md1dsp partition facts.
 No proprietary material (no firmware payload bytes, no decompiled code)
 was accessed during development.

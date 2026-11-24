@@ -237,7 +237,7 @@ only the container grammar and the fixed-config IEs are shared across generation
 ## 9. Reproduction
 
 ```sh
-python3 -I librephone-blob-research/blob-matrix/desktop/tools/fat_extract.py \
+python3 -I open-device/blob-matrix/desktop/tools/fat_extract.py \
     data-fetch/enchilada/modem.img /tmp/modem-fat-b
 python3 -I analysis/tools/gpu_bdwlan_probe.py
 python3 -I analysis/tools/gpu_bdwlan_followup.py

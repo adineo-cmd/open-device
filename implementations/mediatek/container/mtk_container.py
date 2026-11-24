@@ -17,7 +17,7 @@ certificate chain (public tooling exists for that — see README, prior art).
 ======================================================================
 CLEAN-ROOM STATEMENT
 Written from the lab's published spec documents on 2026-11-16:
-  - librephone-blob-research/mediatek/rosemary-census.md, section
+  - open-device/mediatek/rosemary-census.md, section
     "Container formats (empirical, cross-checked)": mtk_hdr byte-for-byte
     layout (magic 0x58881688 @0, payload size @4, NUL-padded ASCII name @8
     with >=20-byte names on MT6785, extension record 0x58891689 @0x30 with
@@ -25,7 +25,7 @@ Written from the lab's published spec documents on 2026-11-16:
     at align(payload_end)); GFH MMM-chain record model; per-payload
     cert1 (1,709 B) + cert2 (957 B) DER X.509 pairs; unsigned modem data
     payload list.
-  - librephone-blob-research/mediatek/docs/md1dsp-decode.md (F-36): GFH
+  - open-device/mediatek/docs/md1dsp-decode.md (F-36): GFH
     MMM chain on md1dsp (sig_type=0, load_addr=0xFFFFFFFF) and record
     type 260 (0x104) absent from U-Boot's enum.
   - U-Boot tools/mtk_image.h (GPL-2.0+, public) for the GFH record struct

@@ -1,0 +1,4 @@
+# Runtime dependency for the ISA/disassembly tools under tools/qualcomm/ and tools/mediatek/.
+# Everything in implementations/ and the repository check scripts uses only the
+# Python standard library and runs with `python3 -I`.
+capstone>=5.0,<6.0

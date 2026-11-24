@@ -71,16 +71,16 @@ census docs); every size is traceable today.
 Per-family provenance (sizes + per-file sha256):
 - modem/image, modem/image/qca6750, vendor/firmware, dsp/adsp,
   dsp/cdsp, modem/verinfo (665 rows):
-  https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/results/census.md
+  https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/results/census.md
 - radio boot-chain partitions xbl/xbl_config/xbl_ramdump/uefi/abl/
   imagefv/shrm/aop/aop_config/cpucp/cpucp_dtb/qupfw + boot/vendor_boot/
   dtbo/pvmfw/vbmeta/vbmeta_system (18 rows):
-  https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/bootchain-census.md
+  https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/bootchain-census.md
 - TrustZone partitions tz/hyp/keymaster/devcfg/uefisecapp/multiimgoem/
   featenabler (7 rows):
-  https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/trustzone-census.md
+  https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/trustzone-census.md
 - bluetooth partition + bluetooth/image (12 rows):
-  https://github.com/adineo-cmd/librephone-blob-research/blob/main/qualcomm-fp6/docs/bt-firmware-census.md
+  https://github.com/adineo-cmd/open-device/blob/main/qualcomm-fp6/docs/bt-firmware-census.md
 
 Type labels follow the FP5 row choices where the same kind of file
 exists on FP5 (abl/xbl=UEFIBOOT, boot=BOOT, tz=BOOT, hyp=SECUREBOOT,

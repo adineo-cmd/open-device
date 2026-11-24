@@ -12,7 +12,7 @@ BT-fleet reference side.
 **Discipline:** no proprietary payload bytes in this document — offsets, sizes, hashes,
 statistics, ≤16-byte hex samples and short ASCII strings only.
 
-**Method class note (per `librephone-blob-research/mediatek/docs/md1dsp-decode.md`
+**Method class note (per `open-device/mediatek/docs/md1dsp-decode.md`
 vocabulary, applied without reusing its MediaTek content):** capstone is not installed
 in this environment and has no Hexagon backend anyway, so the `isa_probe.py`
 decode-rate sanity cannot run and no byte-level decode was attempted. The probe used
@@ -294,7 +294,7 @@ periodicity hints at a second table with a different shape — open item.
 
 ### 3.7 Correction to prior doc (applied in the same push)
 
-`librephone-blob-research/blob-matrix/desktop/fleet-re/gpu-bdwlan.md` §5.2 described
+`open-device/blob-matrix/desktop/fleet-re/gpu-bdwlan.md` §5.2 described
 tag 19 as "payload 100% non-zero, entropy 3.50". Measured: **byte-level nonzero
 fraction 0.4099**, entropy 3.501 (confirmed), and **six all-zero 256-B blocks** —
 "100% non-zero" is wrong at byte and block level. Corrected in gpu-bdwlan.md §5.2 in
@@ -336,7 +336,7 @@ the same push (file owner = same agent session).
 python3 -I analysis/tools/bm2n_isa_probe2.py /tmp/bm2n-parts/bm2n.json
 python3 -I analysis/tools/bm2n_isa_probe3.py /tmp/bm2n-parts/bm2n3.json
 python3 -I analysis/tools/bt_fleet_join2.py  /tmp/bm2n-parts/bt.json
-python3 -I librephone-blob-research/blob-matrix/desktop/tools/qca_tlv_parse.py \
+python3 -I open-device/blob-matrix/desktop/tools/qca_tlv_parse.py \
     /tmp/bm2n-parts/bt-tlv.json data-fetch/second-device/instantnoodle/bt-fat/*
 python3 -I analysis/tools/tag19_geometry.py  /tmp/bm2n-parts/tag19.json
 python3 -I analysis/tools/tag19_regdb_compare.py /tmp/bm2n-parts/tag19regdb.json
