@@ -18,6 +18,7 @@ recorded, the source is linked instead of invented.
 | — | MediaTek modem entry uses nanoMIPS | It is **MIPS32 LE with MIPS16e islands**; nanoMIPS belongs to later Dimensity silicon. | `README.md` |
 | — | Qualcomm WCN6750 WiFi core is an 8-bit AVR (upstream Linux) | It is **32-bit RISC-V**. | `README.md` |
 | 2026-11-19 | Repository scope is phone-specific | Renamed the repository (old and new names in `RENAME.md`); scope is now every device class. | `RENAME.md` |
+| 2026-11-24 | Kryo 2XX MIDRs are `0x51008000` (gold) / `0x51008010` (silver) | They are **`0x510F8000` / `0x510F8010`**. `MIDR_CPU_MODEL` puts `0xf` in the architecture field (`cputype.h:43`), so the `0x0` nibble was wrong. A booted MSM8998 reports `0x51AF8001` / `0x51AF8014`, which mask down to the corrected pair. Fixed in place in the MSM8998 note, the SM4375 note and `docs/REPO-STATE-MAP.md`. | `research/soc/Qualcomm-MSM8998-Snapdragon-835-cpu.md` §4 (#841); `arch/arm64/include/asm/cputype.h:43` |
 
 ## Contributing a correction
 

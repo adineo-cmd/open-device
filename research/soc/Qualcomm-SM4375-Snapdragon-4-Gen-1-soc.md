@@ -90,7 +90,7 @@ Arithmetic, exact:
 Both are ARM-implemented parts (`imp` = `0x41`), not Qualcomm-implemented ones.
 This is the **opposite** of the MSM8998 case documented in
 `Qualcomm-MSM8998-Snapdragon-835-soc.md` §1.2, where both clusters report
-Qualcomm part numbers (`0x51008000` / `0x51008010`) because Kryo 280 was a
+Qualcomm part numbers (`0x510F8000` / `0x510F8010`) because Kryo 280 was a
 Qualcomm design. SM4375's cores are stock ARM cores carrying Qualcomm's
 marketing name, exactly as `cputype.h:241-246` says for the next tier up:
 

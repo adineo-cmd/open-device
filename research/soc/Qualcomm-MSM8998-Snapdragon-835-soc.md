@@ -103,9 +103,17 @@ inferred from marketing.
 `MIDR_CPU_MODEL(imp, partnum) = (imp<<24) | (0xf<<16) | (partnum<<4)`:
 
 ```
-MIDR_QCOM_KRYO_2XX_GOLD    0x51008000
-MIDR_QCOM_KRYO_2XX_SILVER  0x51008010
+MIDR_QCOM_KRYO_2XX_GOLD    0x510F8000
+MIDR_QCOM_KRYO_2XX_SILVER  0x510F8010
 ```
+
+**Corrected 2026-11-24:** these two constants were published here as
+`0x51008000` / `0x51008010`, which is off by one nibble — the macro puts `0xf`
+in the architecture field, not `0x0`. The values above are the macro's actual
+output. A booted MSM8998 reports `0x51AF8001` (gold) / `0x51AF8014` (silver),
+which mask down to these two exactly. Full derivation, the two public device
+captures, and the Rule 1 sweep are in
+`research/soc/Qualcomm-MSM8998-Snapdragon-835-cpu.md` §4 (#841).
 
 [I] An MSM8998 core therefore reads one of those two MIDRs at runtime, and
 `arch/arm64/kernel/cpufeature.c:1701-1702` lists both in the KPTI-safe table —
@@ -921,9 +929,12 @@ SoC string and two disjoint sets of hardware.
 1. **No instruction-level CPU proof exists in this corpus, and I did not
    manufacture one** [N]. `isa_identified` is empty on all 871 rows; mainline's
    DT gives all eight cores one `qcom,kryo280` string with no MIDR; no payload
-   was read. §1.2 states the MIDR the kernel expects (`0x51008000` /
-   `0x51008010`) and says plainly that observing it needs `MIDR_EL1` from a
-   booted device.
+   was read. §1.2 states the MIDR the kernel expects (`0x510F8000` /
+   `0x510F8010`) and says plainly that observing it needs `MIDR_EL1` from a
+   booted device. **Superseded in part 2026-11-24:** the corpus still cannot
+   supply it, but two public device captures do — an MSM8998 reports
+   `0x51AF8001` / `0x51AF8014`. See
+   `research/soc/Qualcomm-MSM8998-Snapdragon-835-cpu.md` §4 (#841).
 2. **I did not parse a single ELF, MDT or ext4 image** [N]. Every size, hash and
    device count is the matrix or the DT. The `dsp.img`-is-ext4 claim is
    *borrowed* from `research/fleet/dsp-tz-map.md` on OnePlus 6 and explicitly
@@ -1182,7 +1193,7 @@ curl -s "https://gitlab.com/api/v4/projects/postmarketOS%2Fpmaports/repository/f
 | 15 reserved regions / 236,015,616 B; `tz_mem` 45.00 MiB at `0x86200000`; contiguity and gaps | `msm8998.dtsi:30-119`, `:114-118` | 2026-11-22 |
 | SM8150 `tz_mem` 57 MiB at the same base | `arch/arm64/boot/dts/qcom/sm8150.dtsi:718-720` | 2026-11-22 |
 | SM8150 has `sm8150-cdsp-pas` at `:3367`; SM8250 at `:3790` | `sm8150.dtsi`, `sm8250.dtsi` | 2026-11-22 |
-| `ARM_CPU_IMP_QCOM` 0x51; KRYO_2XX_GOLD 0x800 / SILVER 0x801 → MIDR `0x51008000` / `0x51008010` | `arch/arm64/include/asm/cputype.h:58,128-129,218-219` | 2026-11-22 |
+| `ARM_CPU_IMP_QCOM` 0x51; KRYO_2XX_GOLD 0x800 / SILVER 0x801 → MIDR `0x510F8000` / `0x510F8010` (0xf in the architecture field); a booted 8998 reports `0x51AF8001` / `0x51AF8014`, which mask to the same two | `arch/arm64/include/asm/cputype.h:43,58,128-129,230-231`; device captures in `research/soc/Qualcomm-MSM8998-Snapdragon-835-cpu.md` §4 | 2026-11-24 |
 | both Kryo 2xx MIDRs in the KPTI-safe list | `arch/arm64/kernel/cpufeature.c:1701-1702` | 2026-11-22 |
 | `qcom,kryo280` is a documented `compatible` in the enum | `Documentation/devicetree/bindings/arm/cpus.yaml` | 2026-11-22 |
 | `QCOM_ID_MSM8998` = 292 | `include/dt-bindings/arm/qcom,ids.h:143` | 2026-11-22 |
