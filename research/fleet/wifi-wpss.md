@@ -296,9 +296,14 @@ attribute section, not inferred from strings.
 
 **Attribution caveat `[N]`.** The kernel does *not* say WPSS is RISC-V, and says the
 opposite where it says anything: `Documentation/devicetree/bindings/remoteproc/qcom,sc7280-wpss-pil.yaml`
-calls it a "Hexagon core" three times (that is boilerplate inherited from the
-ADSP/CDSP bindings), `qcom_q6v5_pas.c` makes no ISA claim at all, and a `grep -i risc`
-over the ath11k tree returns nothing. The RISC-V evidence is **firmware-side and
+calls it a "Hexagon core" **twice** — lines 80 and 104, in the `memory-region` and
+`qcom,smem-states` property descriptions — and that is boilerplate inherited from the
+ADSP binding, whose own `qcom,sc7280-adsp-pil.yaml` uses the identical two phrases
+(its lines 74 and 91).
+`qcom_q6v5_pas.c` makes no ISA claim at all, and a `grep -i risc` over the ath11k
+tree returns nothing. (An earlier draft said "three times"; every revision of the
+binding from its introduction in `2630504` onward carries exactly two, and so does
+the ADSP binding.) The RISC-V evidence is **firmware-side and
 twofold**: the `.riscv.attributes` string above, and linux-firmware's
 `ath11k/WCN6750/hw1.0/Notice.txt` line 914, which carries a build path
 `//components/rel/core.riscv/1.0/api/kernel/libstd/stringl/stringl.h` alongside five
@@ -1270,6 +1275,31 @@ The script prints `s[3]`, the **section** header's `sh_addr` — that is where
 `0x4ff00000` comes from. It is not a `p_vaddr`: the enclosing phdr 6 has
 `p_vaddr=0xc0869000` (`sc7280`) / `0xc089d000` (`qcm6490`), with identical
 `p_filesz=266684` and `p_memsz=270336`, and `.data` at `sh_offset=4096` within it.
+
+The kernel-attribution claim in §2.6 is verifiable without any firmware at all:
+```sh
+python3 -I -c "
+import subprocess
+url='https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/Documentation/devicetree/bindings/remoteproc/'
+for f in ('qcom,sc7280-wpss-pil.yaml','qcom,sc7280-adsp-pil.yaml'):
+    t=subprocess.run(['curl','-sSL',url+f],capture_output=True,text=True).stdout
+    hits=[(i+1,l.strip().split('description: ')[-1]) for i,l in enumerate(t.splitlines())
+          if 'Hexagon core' in l]
+    prop=None; props=[]
+    for i,l in enumerate(t.splitlines()):
+        if l.startswith('  ') and l.strip().endswith(':') and not l.strip().startswith('-'):
+            prop=l.strip().rstrip(':')
+        if 'Hexagon core' in l: props.append(prop)
+    print(f,'size',len(t.encode()),'hits',len(hits))
+    for (n,_),p in zip(hits,props): print('  line',n,'under',p)
+    print('  risc mentions:',t.lower().count('risc'))
+"
+```
+Output, for both bindings: exactly **2** hits, under `memory-region` and
+`qcom,smem-states`, and **zero** `risc` mentions. Every revision of the WPSS
+binding from its introduction in `2630504` (v5.19) through v6.6 has the same two
+lines; the festival of older tags is why this is worth a script rather than a
+memory. `qcom_q6v5_pas.c` likewise contains no `risc` or `hexagon` at all `[F]`.
 
 **9.5a `board-2.bin` TLV tail layouts (§3.3)**
 ```sh
