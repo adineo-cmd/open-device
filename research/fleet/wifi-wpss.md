@@ -431,6 +431,21 @@ Both are attested as the `.data` body of an upstream `board-2.bin` entry:
 Command §9.6. So 26,328 B is the WCN3990-generation body and 58,180 B is the
 WCN6750/WCN6855-generation body `[F]`.
 
+**Scope of that table, stated because it is easy to over-read `[F]`.** The counts
+are of *board bodies* only: entries with `data_type == 1` whose payload is an ELF
+or a raw blob over 1,000 B. The WCN6855 container additionally carries **five**
+`data_type == 0` entries of 106–131 B. Those are not board bodies at all: their
+payload is a plain ASCII `bus=pci,…` descriptor string, not a TLV body. Four of the
+five name a *different* subsystem than the entry's own name — entry
+`subsystem-vendor=17cb,subsystem-device=337e` carries
+`subsystem-vendor=105b,subsystem-device=e105`, and entry `…=910a` carries `…=940a` —
+which reads as an alias or redirect record; the fifth (`subsystem-device=0108`)
+carries a prefix of its own name. **None** of the five payloads matches any entry
+name in the container, so what the alias resolves to is not visible in this file
+`[N]`. A reader who re-walks the container without the `data_type` filter will see
+`{106, 107, 108, 131, 58180}` for WCN6855 and may think this table is wrong; it is
+the filter, and §9.6 applies it (`if dt==1` and `sz>1000`).
+
 **19,152 B is not a third generation — it is the short tail of the 26,328 B
 grammar.** In the WCN3990 container, 8 of 36 entries ship at 19,152 B and 28 at
 26,328 B; but 3 of the 28 long entries walk their TLV list to exactly **19,152 B**
