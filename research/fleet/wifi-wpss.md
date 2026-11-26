@@ -667,6 +667,35 @@ The 16 `.elf.<region>.<ipa|epa>` rows on 4 devices add region tokens `berlin`,
 → `bdwlan.bin` / `bdwlan.elf`; `board_id < 0xFF` → `bdwlan.b%02x` / `bdwlan.e%02x`;
 `board_id > 0xFF` → `bdwlan.%02x.b%02x` from `board_id >> 8` and `board_id & 0xFF`.
 
+**Provenance, because the header above over-claimed `[F]`.** `cnss2` is **not in
+mainline Linux**: there is no `cnss2` directory anywhere under
+`drivers/net/wireless/` in `torvalds/linux` (checked by tree listing, not by a
+guessed path), and no `drivers/net/wireless/*/cnss2/qmi.c` resolves. It is a
+Qualcomm **vendor** driver that ships in OEM/SoC kernel trees — verified present in
+`LineageOS/android_kernel_google_msm-4.14` and
+`OnePlusOSS/android_kernel_oneplus_sm8250`. So this rule is cited as the *vendor*
+convention the fleet was built against, not as upstream code, and an earlier
+sentence in this document's header claiming every kernel source here came from
+`git.kernel.org`/`torvalds/linux` was wrong for this one file. `mdt_loader.c` and
+`mdt_loader.h` *are* mainline and were fetched from there.
+
+**The vendor tree also disagrees with itself across `bdf_type`, which the summary
+above flattens.** Read from the OnePlusOSS `sm8250` tree, the `> 0xFF` arm is not
+one form but two, and the `0xFF` arm is not a constant either:
+
+| `bdf_type` | `board_id == 0xFF` | `< 0xFF` | `> 0xFF` |
+|---|---|---|---|
+| `CNSS_BDF_BIN` | `bdwlan.bin` | `bdwlan.b%02x` | `bdwlan.%02x.b%02x` |
+| `CNSS_BDF_ELF` | **redirect** to `cnss_get_filename(pj_id, hw_id, rf_id, …)` | `bdwlan.e%02x` | `bdwlan.%02x.`**`e`**`%02x` |
+
+Two consequences. First, the `> 0xFF` ELF form is `.e`, not `.b`, so the dotted
+family is really `bdwlan.%02x.b%02x` *and* `bdwlan.%02x.e%02x`. Second, the
+`0xFF`+ELF case in this tree does **not** produce `bdwlan.elf` at all — it
+substitutes a project/hardware/RF-id filename, so `bdwlan.elf` in the matrix comes
+from some other producer (a different vendor tree, or a different kernel version).
+That makes the `0xFF` rule the *most* version-dependent branch, not the most stable
+one. Both dotted forms are **0 rows** in 5,120 `bdwlan` rows either way `[F]`.
+
 This is confirmed independently by the ELF `.strtab` of `board-2.bin`'s entries,
 which still carry their build-time source filenames:
 
