@@ -9,9 +9,13 @@ the command in §9) · `[I]` inference (strong, derived from measurement) · `[H
 hypothesis (plausible, unverified) · `[N]` honest negative (probed, not found).
 
 **Rule 0.** Prior art was searched on 2026-11-20 before any work; the queries and
-the resulting DELTA are recorded on the issue. The kernel sources cited below were
-fetched the same day from `git.kernel.org` / `torvalds/linux`, and the firmware
-payloads from `linux-firmware`. Nothing here is copied from a proprietary payload:
+the resulting DELTA are recorded on the issue. The **mainline** kernel sources cited
+below (`mdt_loader.c`, `mdt_loader.h`) were fetched the same day from
+`git.kernel.org` / `torvalds/linux`, and the firmware payloads from
+`linux-firmware`. One cited source is **not** mainline: `cnss2/qmi.c` is a Qualcomm
+vendor driver absent from `torvalds/linux` and was read from OEM/SoC trees — see §4
+for its provenance and for why that distinction changes how stable its rule is.
+Nothing here is copied from a proprietary payload:
 only sizes, offsets, counts, hashes, and short strings.
 
 **What this document is not.** `mdt_loader.c` already specifies the split-file
