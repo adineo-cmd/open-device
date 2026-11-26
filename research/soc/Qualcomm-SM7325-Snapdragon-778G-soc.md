@@ -27,8 +27,8 @@ which is §2.3 and is the largest single finding here.
 | SoC identity | SM7325 = Snapdragon 778G; board codenames **`berlin`** (Edge 20) and **`berlna`** (Edge 2021) | [F] |
 | SoC ID in mainline | **`QCOM_ID_SM7325` = 475** at `qcom,ids.h:239`, and `qcom_board_id(SM7325)` at `socinfo.c:480` | [F] |
 | CPU topology | **1× Kryo 670 Prime + 3× Kryo 670 Gold + 4× Kryo 670 Silver**, 8 cores, 6 nm, 2021 — postmarketOS SoC page; DT gives 4/3/1 with three `freq-domain`s | [F] |
-| CPU instruction-level ID | **standard ARM MIDRs only** — all 8 cores are `qcom,kryo`/`qcom,kryo670` in DT; per `cputype.h:241-246` the Kryo 6XX clusters report **A78 `0x410fd410`** (Gold), **A55 `0x410fd050`** (Silver) and **X1 `0x410fd440`** (Prime). **No Qualcomm-specific part number is encoded** — `cputype.h` has no `KRYO_6XX_*` part number at all | [F] for the mapping, [I] for the per-cluster split, [OPEN] for the Prime's real core |
-| CPU cluster shape | **one `cpu-map` cluster, three `freq-domain`s, three `capacity-dmips-mhz` values (1024 / 1946 / 1985)** — the only SM7325-family DT in mainline and the first full one in this repo | [F] |
+| CPU instruction-level ID | **standard ARM MIDRs only, and only two distinct values** — all 8 cores are `qcom,kryo`/`qcom,kryo670` in DT; the Prime and the Gold cluster are **both Cortex-A78** (`0x411fd411` at the device's r1p1) and the Silver is A55 (`0x412fd050` at r2p0). **No Qualcomm-specific part number is encoded** — `cputype.h` has no `KRYO_6XX_*` part number at all. The earlier X1 reading of the Prime is **wrong**; see `Qualcomm-SM7325-Snapdragon-778G-5G-cpu.md` §3 | [F] for the mapping, [I] for the per-cluster assignment, [F] that the Prime is not an X1 |
+| CPU cluster shape | **vendor DT: three `cpu-map` clusters (4 / 3 / 1); mainline: one `cluster0` of 8 cores; three `freq-domain`s and three `capacity-dmips-mhz` values (1024 / 1946 / 1985) in both** — the vendor `yupik.dtsi` is described in `Qualcomm-SM7325-Snapdragon-778G-5G-cpu.md` §2 | [F] |
 | `sm7325.dtsi` parent | **`kodiak.dtsi`, not `sc7280.dtsi`** — `sc7280.dtsi` was renamed by `dd6edcd7d3e4` on 2025-10-30 and **no longer exists** at master; 31 `sc7280*` board files remain against 1 `kodiak.dtsi` | [F] |
 | GPU | Adreno 642L marketing / `adreno-635.0` DT / `0x06030500` chip ID / `7c3` helper — **cited from #2030** | [F] |
 | GPU firmware mainline binds | `a660_sqe.fw` + `a660_gmu.bin` + `a660_zap.mbn` — **0 of 3 in this slice**; all three exist upstream, but `a660_zap.mbn` **only under `qcom/qcm6490/`**, not under any `qcom/sm7325/` path (§8.3) | [N, F] |
@@ -84,8 +84,9 @@ one prime at the top. There is no contradiction [F].
 
 ### 1.2 Mainline gives a real `cpu-map`, three `freq-domain`s and three capacities
 
-Unlike SM4375 (#811), which has **no** device tree at all in mainline, SM7325 is
-one of the best-described parts in this repo. `kodiak.dtsi` (202,322 B) declares
+Unlike SM4375 (#811), which has **no** device tree in *mainline* (it has only a
+vendor `blair.dtsi`), SM7325 has both — and mainline is one of the
+best-described parts in this repo. `kodiak.dtsi` (202,322 B) declares
 eight CPUs with distinct capacity and frequency-domain values [F]:
 
 | cpu | `reg` | `capacity-dmips-mhz` | `dynamic-power-coefficient` | `operating-points-v2` | `freq-domain` |
@@ -105,9 +106,11 @@ three, one** [F]. The OPP table maxima are 2.016 / 2.611 / 3.014 GHz, which is
 *higher* than the marketing clocks and matches the pattern that the DT lists
 silicon limits while the SKU fuse sets the shipped clock [I].
 
-There is exactly **one** `cpu-map` cluster, with eight `coreN` children, and the
-per-cluster structure exists only via `freq-domain` and `capacity-dmips-mhz`,
-not via a second `clusterN` [F]:
+There is exactly **one** `cpu-map` cluster in mainline, with eight `coreN`
+children, and the per-cluster structure exists only via `freq-domain` and
+`capacity-dmips-mhz`, not via a second `clusterN` [F]. The **vendor** DT,
+`yupik.dtsi` (144,296 B), does split it into three clusters — 4 / 3 / 1 — and is
+analysed in `Qualcomm-SM7325-Snapdragon-778G-5G-cpu.md` §2 [F]:
 
 ```
 $ grep -c 'qcom,freq-domain = <&cpufreq_hw ' kodiak.dtsi      -> 8
@@ -185,34 +188,53 @@ This is the substantive difference from SM4375, and it answers the issue's
  */
 ```
 
-Kryo 670 is a **6XX** part. So:
+Kryo 670 is a **6XX** part, and the NOTES block above is a **family-level**
+statement — it covers Kryo 680, whose prime *is* an X1. It does not cover Kryo
+670, whose prime is not. So:
 
-| cluster | marketing | `cputype.h` says it reports | MIDR encoding | MIDR value |
+| cluster | marketing | reported core | MIDR encoding | MIDR value |
 |---|---|---|---|---|
-| Prime (1×) | Kryo 670 Prime | `MIDR_CORTEX_X1` (`ARM_CPU_PART_CORTEX_X1` = `0xD44`) | `MIDR_CPU_MODEL(0x41, 0xD44)` | **`0x410fd440`** |
-| Gold (3×) | Kryo 670 Gold | `ARM_CPU_PART_CORTEX_A78` = `0xD41` | `MIDR_CPU_MODEL(0x41, 0xD41)` | **`0x410fd410`** |
-| Silver (4×) | Kryo 670 Silver | `MIDR_CORTEX_A55` = `0xD05` | `MIDR_CPU_MODEL(0x41, 0xD05)` | **`0x410fd050`** |
+| Prime (1×) | Kryo 670 Prime | `ARM_CPU_PART_CORTEX_A78` = `0xD41` | `MIDR_CPU_MODEL(0x41, 0xD41)` + r1p1 | **`0x411fd411`** |
+| Gold (3×) | Kryo 670 Gold | `ARM_CPU_PART_CORTEX_A78` = `0xD41` | `MIDR_CPU_MODEL(0x41, 0xD41)` + r1p1 | **`0x411fd411`** |
+| Silver (4×) | Kryo 670 Silver | `MIDR_CORTEX_A55` = `0xD05` | `MIDR_CPU_MODEL(0x41, 0xD05)` + r2p0 | **`0x412fd050`** |
+
+The earlier revision of this table assigned the Prime `MIDR_CORTEX_X1`
+(`0x410fd440`) by applying the family-level NOTES line to a specific part. That
+was wrong. Three `sm7325` captures — `berlna_global` (item 103878, one of this
+slice's own devices), `redwood_global` (103829) and `Spacewar` (103714) — all
+report `FAMILY Cortex-A78 Cortex-A78 Cortex-A55`, and the same field does report
+`Cortex-X1` for `sm8350` (item 103708), so it can discriminate. Six published
+specs agree. Full evidence, including the control experiment, is in
+`Qualcomm-SM7325-Snapdragon-778G-5G-cpu.md` §3.
+
+The consequence is that **this SoC has two distinct MIDRs, not three**: CPU0–3
+report A55 and CPU4–7 all report A78. The Prime is *not* distinguishable from
+the Gold cluster by MIDR, only by `cpu-map`/`freq-domain`.
 
 `MIDR_CPU_MODEL(imp, partnum)` is `((imp) << 24) | (0xf << 16) | ((partnum) << 4)`
 — implementor, the fixed **architecture nibble `0xf`**, and part number, with the
-variant and revision fields left zero (`cputype.h:30,43-47`) [F]. The `0xf` is the
-ARMv8 architecture field, which is why every value below has `f` in bits 19:16
-and why dropping it yields a wrong number:
+variant and revision fields supplied separately by `MIDR_CPU_VAR_REV`
+(`cputype.h:30,43-49`) [F]. The `0xf` is the ARMv8 architecture field, which is
+why every value below has `f` in bits 19:16 and why dropping it yields a wrong
+number:
 
 ```
 $ python3 -I -c "
 m=lambda imp,pn:(imp<<24)|(0xf<<16)|(pn<<4)
-print('X1  0x%08x'%m(0x41,0xD44))
-print('A78 0x%08x'%m(0x41,0xD41))
-print('A55 0x%08x'%m(0x41,0xD05))"
-X1  0x410fd440
-A78 0x410fd410
-A55 0x410fd050
+r=lambda b,v,rv:b|(v<<20)|rv
+print('A78 r0p0 0x%08x'%r(m(0x41,0xD41),0,0))
+print('A78 r1p1 0x%08x'%r(m(0x41,0xD41),1,1))
+print('X1  r1p0 0x%08x'%r(m(0x41,0xD44),1,0))
+print('A55 r2p0 0x%08x'%r(m(0x41,0xD05),2,0))"
+A78 r0p0 0x410fd410
+A78 r1p1 0x411fd411
+X1  r1p0 0x411fd440
+A55 r2p0 0x412fd050
 ```
 
-The X1 row is a `cputype.h` mapping only; this note does not claim the 778G's
-prime core is literally an X1 (the 1+3+4 Kryo 670 Prime is a vendor-named core,
-§1.1) [OPEN].
+The X1 row is retained above only to show what the wrong part number would have
+produced; it is not a claim about this SoC. `ARM_CPU_PART_CORTEX_X1` = `0xD44`
+still exists in `cputype.h:82` and is still what Kryo 680's prime reports [F].
 
 The **engineering consequence** is what matters: there is **no**
 `QCOM_CPU_PART_KRYO_6XX_*` in `cputype.h`. The only Qualcomm-private part
@@ -226,15 +248,25 @@ fingerprint [I].
 
 Two corollaries [F]:
 
-1. `cpufeature.c` has **zero** occurrences of `CORTEX_A78` (it appears in no
-   erratum or mitigation list at all), while `CORTEX_A55` appears at `:1695` in
+1. `cpufeature.c` has **zero** occurrences of `CORTEX_A78` — that much is true
+   — but the parenthetical conclusion drawn from it, that A78 "appears in no
+   erratum or mitigation list at all", is **wrong**. `cpufeature.c` holds
+   capability and DBM tables; the erratum tables live in `cpu_errata.c` and the
+   Spectre mitigations in `proton-pack.c`, and A78 appears in three of them at
+   master: `cpu_errata.c:402` (inside `CONFIG_ARM64_ERRATUM_4118414`, TLBI
+   completion), `cpu_errata.c:669` (inside `CONFIG_ARM64_ERRATUM_3194386`,
+   `erratum_spec_ssbs_list`) and `proton-pack.c:882`
+   (`spectre_bhb_k32_list`). The Kconfig help text names the errata explicitly:
+   "ARM Cortex-A78 erratum 4193791" and "ARM Cortex-A78 erratum 3324344". See
+   `Qualcomm-SM7325-Snapdragon-778G-5G-cpu.md` §4. What *is* true is that A78 is
+   absent from `cpufeature.c`'s DBM list, so the A78 clusters take the SSBS and
+   TLBI workarounds but not the DBM one. `CORTEX_A55` appears at `:1695` in
    the KPTI-safe list (`kpti_safe_list`, `unmap_kernel_at_el0`) and again at
    `:1869` in the **broken-DBM erratum** list (`cpu_has_broken_dbm`, guarded by
    `CONFIG_ARM64_ERRATUM_1024718`); `MIDR_QCOM_KRYO_4XX_SILVER` appears at
    `:1704` and `:1871`. So this SoC's Silver cores are two distinct cases
    depending on which core they are — an A55 is KPTI-safe *and* carries the DBM
-   erratum, while a Kryo 4XX Silver has its own entries — and the Gold cores
-   need no workaround at all [F].
+   erratum, while a Kryo 4XX Silver has its own entries [F].
 2. `Documentation/devicetree/bindings/arm/cpus.yaml` lists `qcom,kryo670` at
    `:224` among 17 enumerated `kryo` values (`kryo240`…`kryo780`) plus a plain
    `qcom,kryo` escape hatch at `:243`. So `qcom,kryo670` is a **documented**
@@ -1146,16 +1178,18 @@ place as a device [I].
    that Kryo 6XX Gold reports A78 and Silver reports A55; which of *this* part's
    8 cores is which is read from the DT's `capacity-dmips-mhz` and
    `freq-domain`, not from a MIDR read. The MIDR **values**
-   (`0x410fd410`/`0x410fd050`) are arithmetic on documented constants; the
-   **assignment** to specific cores is inference [I]. The X1 value
-   `0x4100d440` is arithmetic on the same basis and carries the same caveat.
+   (`0x411fd411`/`0x412fd050`) are arithmetic on documented constants plus the
+   observed `REVISION` string; the **assignment** to specific cores is
+   inference [I].
 
-7. **The Prime core's real core is `[OPEN]`.** §1.4 derives the X1 MIDR
-   (`0x4100d440`) because `cputype.h` says Kryo 6XX Prime reports
-   `MIDR_CORTEX_X1`; that is a *documented mapping*, not evidence that this
-   part's prime core is an X1. The DT names nothing beyond
-   capacity/freq-domain for cpu7, so the Prime identity is `[OPEN]` [F for the
-   mapping, OPEN for this part].
+7. **The Prime is an A78 by published capture, not by MIDR read.** §1.4 assigns
+   the Prime `0x411fd411` — the *same* value as the Gold cluster — on the
+   strength of three `sm7325` deviceinfohw captures reporting
+   `FAMILY Cortex-A78 Cortex-A78 Cortex-A55`, a discriminating control
+   (`sm8350` prints `Cortex-X1`), and six published specs. No `MRS x0, MIDR_EL1`
+   from a 778G was observed, so the identity is `[I]` at the silicon level even
+   though the A78-vs-X1 question itself is settled. See
+   `Qualcomm-SM7325-Snapdragon-778G-5G-cpu.md` §3.2 and §9.2.
 
 8. **Whether `vpu20_2v`/`vpu20_4v` are the venus firmware under a vendor name
    is [OPEN].** Both are 8,068-B single-file `.mdt` in `other`; `venus.mdt` is
@@ -1337,9 +1371,10 @@ print('dsp.img rows',sum(1 for r in rows if r['filename']=='dsp.img'),
 ```bash
 python3 -I -c "
 m=lambda imp,pn:(imp<<24)|(0xf<<16)|(pn<<4)
-print('MIDR X1  0x%08x'%m(0x41,0xD44))
-print('MIDR A78 0x%08x'%m(0x41,0xD41))
-print('MIDR A55 0x%08x'%m(0x41,0xD05))
+r=lambda b,v,rv:b|(v<<20)|rv
+print('MIDR A78 r1p1 0x%08x'%r(m(0x41,0xD41),1,1))
+print('MIDR A55 r2p0 0x%08x'%r(m(0x41,0xD05),2,0))
+print('MIDR X1  r1p0 0x%08x (wrong part for this SoC)'%r(m(0x41,0xD44),1,0))
 for n in (148,692,512):
     print(n,'ELF32?',(n-52)%32==0 and n>=52,'N=',(n-52)//32,'| ELF64?',(n-64)%56==0 and n>=64,'N=',(n-64)//56)
 print('8068 = 692+7528-152?',8068==692+7528-152)
@@ -1413,7 +1448,9 @@ for pat in ('7325','kodiak','berlna','778','berlin'):
 | `sm7325.dtsi` = 537 B, 8× `qcom,kryo670`; parent `kodiak.dtsi` | `arch/arm64/boot/dts/qcom/sm7325.dtsi` | 2026-11-24 |
 | `sc7280.dtsi` renamed to `kodiak.dtsi` by `dd6edcd7d3e4`, 2025-10-30 | `torvalds/linux` commit API, path `sc7280.dtsi` | 2026-11-24 |
 | Kryo 6XX Gold = A78 partnum `0xD41`, Silver = A55 partnum `0xD05`; no `KRYO_6XX_*` part | `arch/arm64/include/asm/cputype.h:74,80,128-133,241-246` | 2026-11-24 |
-| A55 at `:1695` (KPTI-safe) and `:1869` (broken-DBM erratum); `KRYO_4XX_SILVER` at `:1704`,`:1871`; 0 `CORTEX_A78` hits | `arch/arm64/kernel/cpufeature.c` | 2026-11-24 |
+| Prime is **Cortex-A78, not Cortex-X1**: three `sm7325` captures report `FAMILY Cortex-A78 Cortex-A78 Cortex-A55`, `REVISION r1p1 r1p1 r2p0`; control `sm8350` reports `Cortex-X1`; corrected MIDR `0x411fd411` (A78 r1p1) | `deviceinfohw.ru` items 103878, 103829, 103714 (sm7325) and 103708 (sm8350); `Qualcomm-SM7325-Snapdragon-778G-5G-cpu.md` §3 | 2026-11-26 |
+| A55 at `:1695` (KPTI-safe) and `:1869` (broken-DBM erratum); `KRYO_4XX_SILVER` at `:1704`,`:1871`; 0 `CORTEX_A78` hits in `cpufeature.c` | `arch/arm64/kernel/cpufeature.c` | 2026-11-24 |
+| `CORTEX_A78` **is** in the erratum/mitigation lists: `cpu_errata.c:402` (`CONFIG_ARM64_ERRATUM_4118414`), `cpu_errata.c:669` (`CONFIG_ARM64_ERRATUM_3194386`), `proton-pack.c:882` (`spectre_bhb_k32_list`) | `arch/arm64/kernel/{cpu_errata,proton-pack}.c`; `arch/arm64/Kconfig` | 2026-11-26 |
 | `qcom,kryo670` documented at `:224` | `Documentation/devicetree/bindings/arm/cpus.yaml` | 2026-11-24 |
 | GPU: `adreno-635.0`, `0x06030500`, a660 binding, `adreno_is_7c3()` | `research/soc/Qualcomm-SM7325-Snapdragon-778G-5G-gpu.md` (#2030); re-verified in `a6xx_catalog.c:1124-1142` | 2026-11-24 |
 | 3 `.machine =` strings (`sm7150`, `sm4350`, `sm6375`), no `qcom,sm7325`; chip-ID entry carries no `.revn` | `drivers/gpu/drm/msm/adreno/a6xx_catalog.c:820,870,895,1124-1142` | 2026-11-24 |

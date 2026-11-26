@@ -25,7 +25,7 @@ contradicts; §9 records the corrections to this note's own GATE 0.
 | CPU topology | **6 + 2**: six little, two big — vendor `cpu-map` clusters `cluster0`×6 / `cluster1`×2 | [F] |
 | `compatible` on all eight nodes | **`qcom,kryo`** — one string for two core types | [F] |
 | `capacity-dmips-mhz` | **1024 (little ×6) / 1946 (big ×2)** — present, contrary to #811's prediction | [F] |
-| `freq-domain` | `<&cpufreq_hw 0 6>` ×6, `<&cpufreq_hw 1 2>` ×2 — the core counts are *in the phandle args* | [F] |
+| `freq-domain` | `<&cpufreq_hw 0 6>` ×6, `<&cpufreq_hw 1 2>` ×2 — the second cell is the driver's `max_cores` boost threshold, which *coincidentally* equals the cluster size on a 6+2 part (§3.1) | [F] |
 | Platform codename | **`blair`** (SM6375 family base), device ID 578 = **`BLAIR-LITE`** | [F] |
 | `qcom,msm-id` | **`<507 0x10000>, <578 0x10000>`** — 507 named in mainline, **578 is not** | [F] |
 | Little cluster revision | **A55 r2p0** → MIDR **`0x412FD050`** | [I] |
@@ -140,11 +140,29 @@ The `freq-domain` encoding is the load-bearing one. The node declares
 blair.dtsi:1291   #freq-domain-cells = <2>;
 ```
 
-and each CPU passes a domain index **and a core count**: `0 6` for the six
-little cores, `1 2` for the two big ones. So the cluster split is encoded
-**three independent ways** — `cpu-map`, `freq-domain` domain index, and
-`freq-domain` core count — and the core count itself is redundant with both.
-A consumer reading only `compatible` sees a homogeneous 8-core machine [F].
+and each CPU passes a domain index and a **second value** — `0 6` for the six
+little cores, `1 2` for the two big ones.
+
+**The second value is not a core count.** On `blair` (6 + 2) it happens to equal
+the cluster size, which is why this note originally read it that way. It does
+not on other parts: `yupik.dtsi` (4 + 3 + 1) passes `4` for *all three*
+clusters, `lahaina.dtsi` (4 + 3 + 1) passes `4`/`4`/`4`, and `shima.dtsi`
+(4 + 3 + 1) passes `4`/`4`/`4` — measured on all five vendor platform files
+(`Qualcomm-SM7325-Snapdragon-778G-5G-cpu.md` §2.2) [F]. The value tracks the
+*part*, not the *cluster*: every 1+3+4 part says `4` three times, every 6+2 part
+says `6` then `2`.
+
+What it actually is, is visible in the vendor driver: `qcom-cpufreq-hw.c` reads
+both cells and passes the second as `max_cores`, which is compared against
+`LUT_CORE_COUNT` (`GENMASK(18,16)`) to flag boost OPPs — `if (core_count !=
+max_cores) c->table[i].flags = CPUFREQ_BOOST_FREQ;`. It is the LUT's
+**boost-entry threshold**, not a cluster size [F for the code, I for the
+choice of `4`]. Mainline dropped the cell entirely: `#freq-domain-cells` is
+`const: 1` in `cpufreq-qcom-hw.yaml`, and the driver reads only `args[0]` [F].
+
+So the cluster split on `blair` is encoded **two** independent ways — `cpu-map`
+and the `freq-domain` domain index — not three. A consumer reading only
+`compatible` sees a homogeneous 8-core machine [F].
 
 ### 3.2 The frequency domain block
 
@@ -739,6 +757,7 @@ print('SM4375 present',any(v=='SM4375' for v in d.values()))
 | `TARGET_BOARD_PLATFORM := holi`, `TARGET_ARCH_VARIANT := armv8-2a-dotprod`, `holi-qgki_defconfig` | `LineageOS/android_device_motorola_sm6375-common` `BoardConfigCommon.mk:50,54` | 2026-11-24 |
 | `blair-moto-fogo-base.dts` includes `blair.dtsi`; `model = "Qualcomm Technologies, Inc. Blair "`; `qcom,msm-id = <507 0x10000>, <578 0x10000>` | `android_kernel_motorola_sm6375` (lineage-22.2) `arch/arm64/boot/dts/vendor/qcom/` | 2026-11-24 |
 | `blair.dtsi` 94,327 B; 8 CPU nodes all `qcom,kryo`; 2 `cpu-map` clusters 6+2; capacities 1024×6/1946×2; `freq-domain` `0 6`×6 / `1 2`×2; `#freq-domain-cells = <2>`; 8 L2 / 1 L3; `cpufreq_hw` at `:1279` with two 0x1000 windows and `lut-max-entries = 12` | `blair.dtsi`, same tree | 2026-11-24 |
+| the `freq-domain` second cell is **not** a core count: `yupik`/`lahaina`/`shima` (all 4+3+1) pass `4`/`4`/`4`; vendor driver uses it as `max_cores` compared to `LUT_CORE_COUNT` for boost flags; mainline binding is `const: 1` | `yupik.dtsi`,`lahaina.dtsi`,`shima.dtsi`, vendor `qcom-cpufreq-hw.c`, `cpufreq-qcom-hw.yaml`; `Qualcomm-SM7325-Snapdragon-778G-5G-cpu.md` §2.2 | 2026-11-26 |
 | `{ 454, "HOLI" }`, `{ 507, "BLAIR" }`, `{ 578, "BLAIR-LITE" }`, `{ 565, "BLAIRP" }` — same block in `android_kernel_oneplus_sm8350` and `android_kernel_samsung_sm7325` | `drivers/soc/qcom/socinfo.c` (vendor, `:782-787`) | 2026-11-24 |
 | `ARM_CPU_IMP_ARM` 0x41, `ARM_CPU_PART_CORTEX_A55` 0xD05, `ARM_CPU_PART_CORTEX_A78` 0xD41, `MIDR_CPU_MODEL` `:43`, `MIDR_CPU_VAR_REV` `:48`, `MIDR_REV` `:331`, `MIDR_ALL_VERSIONS` `:332`, `midr_is_cpu_model_range` `:334` | `arch/arm64/include/asm/cputype.h`, master | 2026-11-24 |
 | `MIDR_QCOM_KRYO_4XX_SILVER` at `cpufeature.c:1871` with `MIDR_REV(..., 0xd, 0xe)`; `MIDR_CORTEX_A55` at `:1695` (KPTI-safe) and `:1869` (broken DBM) | `arch/arm64/kernel/cpufeature.c`, master | 2026-11-24 |
