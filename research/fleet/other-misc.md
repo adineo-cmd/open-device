@@ -216,6 +216,16 @@ The same reading applies to `vm-bootsys.img` (257.49 MiB, `0x1017D000`) and `cor
 allocation artefacts. `splash.img` and `ldfw.img` are the counter-example — genuinely
 variable, content-sized.
 
+`core_nhlos.img` is also the whole of `db_type=MSDOS` — 5 rows, one filename, and a label
+that names no loader. It is a raw A/B slot (`core_nhlos_a`/`_b`, GPT type
+`6690B4CE-70E9-4817-B9F1-25D64D888357`, 174,080 KB on one reference board and 122,880 KB on
+another), written by `fastboot flash core_nhlos` and **never mounted**: no `fstab` entry
+exists for it anywhere, while the neighbouring `modem_a` slot carries the Microsoft Basic
+Data GUID and *is* mounted vfat at `/vendor/firmware_mnt`. Four of the five rows (three
+distinct sizes: 144.9 MB, 153.7 MB ×2, 153.8 MB) exceed the 120 MiB slot, so slot size is
+board-specific and cannot be read back from the file. Contract, GUIDs and the mainline
+negative in `research/drivers/msdos.md` (#889).
+
 ### 2.2 `modem/image` is where the trustlets live `[F]`
 
 6,391 rows over 63 devices, 1,185,430,566 B. The top names are the split containers:
