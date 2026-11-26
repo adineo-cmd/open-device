@@ -631,7 +631,7 @@ Three files needed in-place fixes. Before/after:
 |---|---|---|
 | `research/soc/Qualcomm-SM7325-Snapdragon-778G-soc.md` §1.4 table + §0 verdict row + §1.4 corollary 1 | Prime = `MIDR_CORTEX_X1` `0x410fd440`; "`CORTEX_A78` … appears in no erratum or mitigation list at all" | Prime = Cortex-A78, `0x411FD411`; `CORTEX_A78` present in `cpu_errata.c:402`, `cpu_errata.c:669`, `proton-pack.c:882` |
 | `research/soc/Qualcomm-SM4375-Snapdragon-4-Gen-1-cpu.md` §3.1 + §0 verdict row + §7.1 table | "the core counts are *in the phandle args*"; "the core count itself is redundant with both" | second phandle cell is the driver's `max_cores` boost threshold, not a core count; `yupik`/`lahaina`/`shima` disprove the core-count reading |
-| `research/CORRECTIONS.md` | 13 rows | 15 rows, one for each correction above |
+| `research/CORRECTIONS.md` | 11 rows | 15 rows — three for the corrections above, plus one for this note's own wrong row count |
 | `docs/REPO-STATE-MAP.md` CPU/SoC row | 6 sections; SM7325 described as "one `cpu-map` cluster" with no vendor DT | 7 sections; SM7325 records the vendor 3-cluster DT and the A78 prime |
 
 The `REPO-STATE-MAP.md` SoCs-remaining count is **unchanged at 21**, because this

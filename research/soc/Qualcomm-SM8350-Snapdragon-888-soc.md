@@ -94,6 +94,15 @@ machine to any consumer that reads `cpu-map`, while `qcom,freq-domain` and
 consumer that derives cluster structure from `cpu-map` alone will see one
 cluster [I].
 
+Three things this section deliberately does not cover, because they belong to
+the core rather than the package: the **MIDR values** for each of the three
+clusters, the **vendor `lahaina.dtsi`**, which describes the same eight cores
+with `qcom,kryo` ×8, three `cpu-map` clusters and a 2048 prime capacity, and the
+**CPUCP** co-processor. Those are in
+`Qualcomm-SM8350-Snapdragon-888-cpu.md` §2–§5. Note in particular that mainline
+is the outlier here: this is one of the few Qualcomm SoCs in mainline that names
+real ARM cores (`arm,cortex-a55`/`a78`/`x1`) instead of `qcom,kryo`.
+
 ## 2. GPU and DSP core identification
 
 ### 2.1 GPU — cited, not repeated
