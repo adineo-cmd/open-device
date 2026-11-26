@@ -70,8 +70,20 @@ this container: `phdrs[0]` is non-`PT_LOAD` and holds the ELF header with
 `p_flags & QCOM_MDT_TYPE_MASK == QCOM_MDT_TYPE_HASH` with
 `QCOM_MDT_TYPE_MASK (7<<24)` and `QCOM_MDT_TYPE_HASH (2<<24)`; split segment names
 are formed by overwriting the last three characters of the firmware name with
-`"b%02d"`; and split versus single-file ("pil-squashed") form is detected by ELF
-validity, not by extension `[F]`.
+`"b%02d"`; and split versus single-file ("pil-squashed") form is decided by a
+**segment-bounds test**, not by the filename extension `[F]`.
+
+On that last point the mechanism is worth stating precisely, because an earlier
+draft called it "ELF validity" and that is wrong. Both forms are *valid* ELF — a
+split `.mdt` carries a real ELF header and real magic. `qcom_mdt_bins_are_split()`
+walks the phdrs skipping zero-`p_filesz` ones and returns true if any
+`p_offset + p_filesz` exceeds `fw->size`. A monolithic image has every segment
+in-bounds, so it returns false; a `.mdt` has phdrs describing segments that live in
+*other* files, so they overrun and it returns true `[F]`. Measured on
+`sc7280/wpss.mbn`: all eight non-zero segments in-bounds → false. On a synthetic
+`.mdt` built as `b00 ‖ b01` (7,188 B): overrun → true, while the magic check still
+passes. ELF *validity* is checked separately, by `mdt_header_valid()`, and both
+forms pass it `[F]`.
 
 The segment-name construction is `sprintf(seg_name + strlen(fw_name) - 3, "b%02d", segment)`
 where `segment` is the phdr loop index `i`, and the file is requested only when
@@ -82,8 +94,12 @@ contiguous; and the hash segment is found by **flags**, not by position `[F]`.
 **Why upstream ships no `wpss.bNN` at all.** linux-firmware's `WHENCE` declares
 `Link: ath11k/WCN6750/hw1.0/wpss.mdt -> sc7280/wpss.mbn` — the `.mdt`-named file
 *is* the monolithic image, so `qcom_mdt_bins_are_split()` returns false and the
-kernel never requests a segment. The split set exists only in vendor
-`modem/image/` partitions, which is exactly the 6 devices in this matrix `[F]`.
+kernel never requests a segment. The same holds for the other variant by a
+different route: `qcm6490/wpss.mbn` carries **no `.mdt` alias at all** (only
+`qcom/qcm6490/wpss.mbn` and `qcom/qcs6490/wpss.mbn` symlinks pointing *at* it), so
+there is no `.mdt` name to request. Neither variant ships a split set. The split
+set exists only in vendor `modem/image/` partitions, which is exactly the 6 devices
+in this matrix `[F]`.
 
 That spec predicts `b<NN>` is program header `NN`. Measured, it is.
 
@@ -1300,6 +1316,33 @@ Output, for both bindings: exactly **2** hits, under `memory-region` and
 binding from its introduction in `2630504` (v5.19) through v6.6 has the same two
 lines; the festival of older tags is why this is worth a script rather than a
 memory. `qcom_q6v5_pas.c` likewise contains no `risc` or `hexagon` at all `[F]`.
+
+The §2.1 split-detection mechanism is checkable from one monolithic image, by
+rebuilding a `.mdt` from it and running the kernel's own predicate over both:
+```sh
+python3 -I -c "
+import struct
+d=open('wpss_sc7280.mbn','rb').read()
+phoff=struct.unpack_from('<I',d,28)[0]; pn=struct.unpack_from('<H',d,44)[0]
+def split(fw):
+    ph=struct.unpack_from('<I',fw,28)[0]; n=struct.unpack_from('<H',fw,44)[0]
+    for i in range(n):
+        t,off,va,pa,fs,ms,f,al=struct.unpack_from('<IIIIIIII',fw,ph+i*32)
+        if not fs: continue
+        if off>len(fw) or off+fs>len(fw): return True
+    return False
+print('monolithic split?',split(d))
+b00=52+32*pn
+h=[i for i in range(pn) if (struct.unpack_from('<I',d,phoff+i*32+24)[0]&(7<<24))==(2<<24)][0]
+t,off,va,pa,fs,ms,f,al=struct.unpack_from('<IIIIIIII',d,phoff+h*32)
+mdt=d[:b00]+d[off:off+fs]
+print('b00=%d hash phdr=%d filesz=%d -> .mdt=%d'%(b00,h,fs,len(mdt)))
+print('.mdt split?',split(mdt),'magic ok?',mdt[:4]==b'\x7fELF')
+"
+```
+Output: `monolithic split? False`; `b00=340 hash phdr=1 filesz=6848 -> .mdt=7188`;
+`.mdt split? True magic ok? True`. Both forms are valid ELF, so the discriminator
+is the bounds test, not validity — which is the correction §2.1 now records.
 
 **9.5a `board-2.bin` TLV tail layouts (§3.3)**
 ```sh
