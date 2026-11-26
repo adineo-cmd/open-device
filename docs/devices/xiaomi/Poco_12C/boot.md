@@ -127,9 +127,29 @@ This is the part I did not expect, and it is the most reusable finding here.
 
 [I] The `soc1_0` prefix is MediaTek's connectivity-subsystem generation (`soc1_0` = the
 MT66xx combo family). The `1a_1` / `2a_1` infix is a **hardware revision of that subsystem**,
-not a device or product code — the two devices run different combo-chip revisions. The
-`_hdr` suffix marks the image as carrying an `mtk_hdr` container header, which is why the
-rosemary census could parse `lk` and `preloader_raw` through the same record chain.
+not a device or product code — the two devices run different combo-chip revisions.
+
+**Correction (2026-11-26, #2066):** the following sentence was wrong and is replaced. It read
+"The `_hdr` suffix marks the image as carrying an `mtk_hdr` container header, which is why the
+rosemary census could parse `lk` and `preloader_raw` through the same record chain."
+
+The `_hdr` suffix does **not** mean `mtk_hdr`. Measured on the on-disk `Poco_12C`-family file
+`soc1_0_ram_wifi_2a_1_hdr.bin` (197,748 B, md5 `b89ff3c18c42e722bcd50fd8e95aba56`): the
+`mtk_hdr` magic `0x58881688` occurs **0** times, and the file opens with a 16-byte ASCII
+timestamp (`2212251605010000`) followed by the tag `ALPS` at offset `0x10` `[F]`. The same
+shape holds on two genuine `linux-firmware` builds — `mediatek/BT_RAM_CODE_MT7961_1_2_hdr.bin`
+(533,870 B, `20260224111243\0\0ALPS` at `0x10`) and
+`mediatek/WIFI_MT7961_patch_mcu_1_2_hdr.bin` (92,192 B, `20260224110909a\nALPS` at `0x10`) —
+both with `mtk_hdr` count **0** `[F]`. So `_hdr` denotes the `ALPS`-tagged MediaTek WiFi/BT
+patch container, which is a **different** format from the `mtk_hdr` record chain that carries
+`lk` and `preloader_raw`. The two are not related, and the `_hdr` files are not parseable by
+the `mtk_hdr` walker `[F]`.
+
+Separately, the `WIFI_RAM_CODE_*` files (no `_hdr`) are the mainline-specified
+**`mt76_connac2`** container (`drivers/net/wireless/mediatek/mt76/mt76_connac_mcu.c`): a
+36-byte trailer at EOF, a 40-byte region descriptor per region immediately before it, and
+region payload tiling forward from offset 0 `[F]`. That is a third format, distinct from both
+the above.
 
 [I] **Why this matters for the matrix.** `filename` is the only column that carries this
 information, and it is free text. A consumer who normalises filenames (stripping version
@@ -190,6 +210,11 @@ filename evidence in §2.
 1. **No binary was fetched or parsed.** This note is matrix-and-inventory metadata only. I did
    not verify `mtk_hdr` magic, the GFH chain, or any ISA claim for `Poco_12C`. The MTK
    container grammar in §2 is **cited from the rosemary census**, not measured here [N].
+
+   *Partially closed 2026-11-26 (#2066):* the `mtk_hdr` question in §2 is now answered from
+   bytes — and the answer is negative. `_hdr.bin` is **not** `mtk_hdr` (0 occurrences of
+   `0x58881688`); it is the `ALPS`-tagged patch container. See the correction in §2. The GFH
+   chain and the `Poco_12C` ISA remain unverified here [N].
 2. **I did not establish `Poco_12C`'s SoC.** The `soc` cell is blank and I did not resolve it.
    "MT6833-class" in §1 is inference from the `1a_1` token and the file set, **not** a
    verified fact, and I do not claim the chip identity [I].
