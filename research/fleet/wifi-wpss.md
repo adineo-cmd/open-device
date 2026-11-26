@@ -774,8 +774,11 @@ established — the payloads are not on this machine, only their sizes and md5s 
 
 ## 5. Which devices carry it `[F]`
 
-**Vendors (73):** motorola 21 · oneplus 18 · xiaomi 13 · sony 7 · google,
-fairphone, samsung 3 each · nothing, realme 2 each · fxtec 1.
+**Vendors (10) across 73 devices:** motorola 21 · oneplus 18 · xiaomi 13 · sony 7 ·
+google, fairphone, samsung 3 each · nothing, realme 2 each · fxtec 1. The
+parenthesis in an earlier draft said "Vendors (73)", which put the *device* count on
+the *vendor* noun; 21+18+13+7+3+3+3+2+2+1 = 73 devices, but the list names **10**
+distinct vendors `[F]`.
 
 **The six split-image devices are exactly the six with both `b` and `e`:**
 
