@@ -314,6 +314,16 @@ standard shape of a memory vendor's part number. `[N]` I did not find a public
 datasheet for any of the 15 within this session and did not decode a payload —
 none of the 15 exists on disk (see §9.2).
 
+`[F]` **This is only half of the class in the corpus.** The same part family
+appears under a different `db_type` with a different naming convention:
+`db_type=STORAGE` holds 5 filenames on 8 Pixel devices at
+`google/<codename>/vendor/firmware`, and Micron part `MT128GBCAV2U31` is a
+strict prefix of two of them — `MICRONMT128GBCAV2U310103.img` and
+`...104.img`, both 1,036,476 B. The two halves share **zero** filenames, **zero**
+sizes and **zero** md5s, so they are distinct firmware revisions for the same
+silicon, not copies. A query filtered on `db_type='FASTCHG'` returns this half
+and silently omits the Pixel half. Details in `research/drivers/storage.md`.
+
 ### 3.4 The 10 `batt_fw` rows are a different class again `[F]`
 
 `batt_fw_adi_79_2.bin` (25,334 B) and `batt_fw_adi_79_3.bin` (26,174 B) sit at
