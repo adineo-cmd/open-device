@@ -5,16 +5,17 @@ Analysis date: 2026-11-26. Analyst: OC-1 (`100milionseek`), issue
 
 Inputs:
 `upstream-contribution/blob-database/coverage-matrix.csv` (33,917 data rows) for the
-census; **thirteen real `fastrpc_shell_*` payloads**, which is what makes this
-note byte-level rather than size-only — seven extracted from two on-disk
+census; **thirteen standalone `fastrpc_shell_*` payloads**, which is what makes
+this note byte-level rather than size-only — seven extracted from two on-disk
 LineageOS dumps (`lineage-fp6` `dsp-adsp`/`dsp-cdsp`, fetched 2026-11-09;
 `instantnoodle/dsp-ext4` `adsp`/`cdsp`/`sdsp`, fetched 2026-11-18) and six
 fetched today from `linux-msm/hexagon-dsp-binaries` branch `trunk`
-(2026-11-26), plus one payload recovered **from inside** an on-disk
-`dsp.img`; `torvalds/linux` `drivers/misc/fastrpc.c` (69,506 B, 2,831 lines,
+(2026-11-26), plus a **fourteenth build** recovered as a zlib stream from
+inside `slpi.b04` within an on-disk `modem.img` (§2.3);
+`torvalds/linux` `drivers/misc/fastrpc.c` (69,506 B, 2,831 lines,
 fetched 2026-11-26) for the interface contract;
-`qualcomm/fastrpc` and `linux-msm/hexagon-dsp-binaries` `README.md` (3,355 B,
-fetched 2026-11-26) for the naming convention; `linux-firmware` `WHENCE`
+`qualcomm/fastrpc` and `linux-msm/hexagon-dsp-binaries` `README.md`
+(fetched 2026-11-26) for the naming convention; `linux-firmware` `WHENCE`
 (542,288 B, 11,954 lines, fetched 2026-11-26) as the upstream negative;
 Check Point Research's Pwn2Own DSP write-up (2021-05-06, fetched 2026-11-26)
 for third-party corroboration; and
@@ -57,10 +58,10 @@ There is one defect to report and one to correct. The defect: `db_type=ELF64`
 on all 3 rows, against ELF**32** on 13 of 13 same-family builds — the same
 wrong-label pattern already recorded for 28/28 rows in
 `research/fleet/other-camera.md` §6 and 757 `.mdt` rows in
-`research/fleet/other-misc.md` §7.3. The correction: a prior note in this
-session treated `census.md`'s `e50a473fb4edcee4` as a truncated **md5** and
-inferred a mismatch; it is the **sha256** column, and the fp6 copy matches it
-exactly (§4.2). That build *is* the census payload.
+`research/fleet/other-misc.md` §7.3. The correction: `census.md`'s
+`e50a473fb4edcee4` is the **sha256** column, and the fp6 copy matches it
+exactly (§4.2) — that build *is* the census payload, and the 16-hex prefix is a
+truncation to 8 bytes, not a mismatch.
 
 ---
 
@@ -69,7 +70,7 @@ exactly (§4.2). That build *is* the census payload.
 1. **`[F]` The bucket is 3 rows / 3 devices / 1 basename / 3 payloads /
    2,523,240 B.** 0.0088% of corpus rows and 0.0036% of corpus bytes;
    0.0200% of `other` rows and 0.0178% of `other` bytes. It is **#13 of 13**
-   `other` subfamilies on both axes — the last bucket in the family by rows
+   `other` subfamilies on both axes — the smallest bucket in the family by rows
    *and* by bytes.
 
 2. **`[F]` `gpu-compute` is one filename.** All 3 rows are
@@ -113,7 +114,7 @@ exactly (§4.2). That build *is* the census payload.
 
 8. **`[F]` `db_type=ELF64` on 3 of 3 rows is wrong, or at minimum unverified.**
    Every same-family build is ELF32. `ELF64` is set on 3,284 corpus rows of
-   which 3,248 have a blank `isa_identified`, and `mdt` files alone are 1,572
+   which 3,248 have a blank `isa_identified`, and `.mdt` files alone are 1,572
    of them — the label is applied by habit, not by parse.
 
 9. **`[N]` No census payload obtainable; `filename:fastrpc_shell_0` returns 8
@@ -153,16 +154,21 @@ exactly (§4.2). That build *is* the census payload.
 
 | rank | by rows | rows | by bytes | bytes |
 |---:|---|---:|---:|---:|
-| 9 | `nfc` | 75 | `nfc` | 9,677,922 |
-| 10 | `esim` | 41 | `esim` | 8,407,085 |
-| 11 | `sensors` | 5 | `audio` | 5,418,315 |
-| 12 | `tinysys` | 4 | `tinysys` | 4,132,864 |
+| 9 | `nfc` | 75 | `esim` | 8,407,085 |
+| 10 | `esim` | 41 | `audio` | 5,418,315 |
+| 11 | `sensors` | 5 | `tinysys` | 4,132,864 |
+| 12 | `tinysys` | 4 | `oled` | 4,068,320 |
 | **13** | **`gpu-compute`** | **3** | **`gpu-compute`** | **2,523,240** |
 
 `other` as a whole is 14,987 rows / 14,152,121,440 B across 13 subfamilies,
 with a median of **284 rows** and **29,190,348 B**. `gpu-compute` is below both
-medians by two orders of magnitude on rows and one on bytes — the smallest
-bucket in the family, and the only one that is a single filename.
+medians — by a factor of **95** on rows (3 vs 284) and **12** on bytes
+(2,523,240 vs 29,190,348).
+
+`[F]` Two subfamilies in `other` are single-filename buckets: `sensors`
+(5 rows, `snsc.bin`) and `gpu-compute` (3 rows, `fastrpc_shell_0`). So
+`gpu-compute` is not unique in being one file — it is the *smallest* such
+bucket, and the only one whose name is wrong on both of its tokens (§6.1).
 
 ### 1.2 One filename, three payloads `[F]`
 
@@ -188,16 +194,19 @@ the first of three independent size↔build failures in this family (§4).
 | Phone_1 | `nothing/Spacewar/modem/image` | `Spacewar` |
 
 `[F]` All three are filed under **`modem/image`**, a directory that carries
-**22,285 rows across 74 devices** in the corpus. But the artifact is an **ADSP
-domain** object (§2), and the corpus has **zero** rows whose `db_path` contains
-`/dsp/` or `dsp-adsp` — the directory that every real device tree uses for
-these files. So the path is a compression artifact, not a location: the shell
-lives inside `modem.img`, which is why the census finds it there (§2.3).
+**22,285 rows across 74 devices and 1,844 basenames** in the corpus. But the
+artifact is an **ADSP/CDSP domain** object (§2), and the corpus has **zero** rows
+whose `db_path` contains `/dsp/` or `dsp-adsp` — the directory that every real
+device tree uses for these files. So the path is a compression artifact, not a
+location: the shell lives inside `modem.img`, which is why the census finds it
+there (§2.3).
 
 `[F]` The label is also not `gpu`. Inside `modem/image` the corpus carries
-**276 rows** of `blob_family=gpu`, and they are all `fpctzapp.bNN` — the
-trust-zone applications, nothing to do with FastRPC. `gpu-compute` is a third
-thing filed in the same directory as both.
+**276 rows** of `blob_family=gpu` with a blank subfamily, and they are the
+trust-zone and GMU artifacts — `fpctzapp` 108, `egtzappf` 72, `a610_zap` 44,
+`a615_zap` 28, `a660_zap` 12, `a740_zap` 4, `a660_gmu` 3, `a660_sqe` 3,
+`a740_sqe` 1, `gmu_gen70200` 1. **Zero** of them contain `fastrpc` in the name.
+`gpu-compute` is a third thing filed in the same directory as both.
 
 ---
 
@@ -231,13 +240,15 @@ domains:
 
 | directory | filename | domain id | agrees |
 |---|---|---:|---|
-| `dsp-adsp/` | `fastrpc_shell_0` | 0 | **yes** |
-| `sdsp/` | `fastrpc_shell_2` | 2 | **yes** |
-| `cdsp/` | `fastrpc_shell_3` | 3 | **yes** |
-| `dsp-cdsp/` | `fastrpc_shell_3` | 3 | **yes** |
-| `dsp-cdsp/` | `fastrpc_shell_unsigned_3` | 3 | **yes** |
+| `dsp-adsp/` (fp6) | `fastrpc_shell_0` | 0 | **yes** |
+| `adsp/` (instantnoodle) | `fastrpc_shell_0` | 0 | **yes** |
+| `sdsp/` (instantnoodle) | `fastrpc_shell_2` | 2 | **yes** |
+| `cdsp/` (instantnoodle) | `fastrpc_shell_3` | 3 | **yes** |
+| `cdsp/` (instantnoodle) | `fastrpc_shell_unsigned_3` | 3 | **yes** |
+| `dsp-cdsp/` (fp6) | `fastrpc_shell_3` | 3 | **yes** |
+| `dsp-cdsp/` (fp6) | `fastrpc_shell_unsigned_3` | 3 | **yes** |
 
-`[F]` Five files, three domains, zero mismatches. This is a decode, not a
+`[F]` Seven files, three domains, zero mismatches. This is a decode, not a
 guess: the directory name and the filename suffix are two independent
 witnesses, and they never disagree.
 
@@ -269,14 +280,14 @@ predicted artifact. `[U]` 5 and 6 sit outside the rule's stated scope.
 ### 2.3 The path oddity, and why it exists `[F]`
 
 `[F]` In the on-disk `instantnoodle` `modem.img` (192,278,528 B, FAT16,
-`bps` 4096, `spc` 4, `fatsz` 13, root at `0x1b000`, data at `0x1f000)`, the
+`bps` 4096, `spc` 4, `fatsz` 13, root start `0x1b000`, data start `0x1f000`), the
 shell names appear **inside** the DSP firmware blobs, not as files:
 
-| image | size | md5 | `fastrpc_shell_N` names inside | `/statichashes/` entries |
-|---|---:|---|---:|---:|
-| `adsp.b04` | 1,961,932 | `052ce311e3a0c79f` | **0** only | 8 |
-| `slpi.b04` | 2,077,548 | `64d4aac91296cfaf` | **2** only | 6 |
-| `cdsp.b05` | 2,803,308 | `525d9c4ed934658c` | **3** only | 79 |
+| image | size | md5 | `fastrpc_shell_N` strings inside | `/statichashes/` entries |
+|---|---:|---|---|---:|
+| `adsp.b04` | 1,961,932 | `052ce311e3a0c79f` | **`_0`**, 2 hits, no other number | 8 |
+| `slpi.b04` | 2,077,548 | `64d4aac91296cfaf` | **`_2`**, 3 hits, no other number | 6 |
+| `cdsp.b05` | 2,803,308 | `525d9c4ed934658c` | **`_3`**, 2 hits, no other number | 79 |
 
 `[F]` The suffix set inside each image matches that image's own domain, 3 of 3.
 `adsp.b04` contains `fastrpc_shell_0` and no other number; `cdsp.b05` contains
@@ -289,8 +300,13 @@ consuming **370,290** bytes and inflating to **706,960** B (md5
 `4b08466ec6a3bcfee81bfe86a628578f`), which begins `7f454c46 01010100` — an
 ELF32 header. Parsed: class 1, `e_type` 3, `e_machine` 164, `e_flags` `0x66`
 (V66), `e_entry` `0x94`, `e_phoff` 52, `e_shoff` 706,080, `phnum` 3, `shnum` 22,
-`shstrndx` 21, slack 0. Its `.comment` is `QuIC LLVM Hexagon Clang version
-8.2.05 (based on LLVM 5.0.0git-c7d6f70)` with `hexagon-clang-82-326`.
+`shstrndx` 21, slack 0, `.text` 475,296, `.rodata` 56,046, `.bss` 78,288. Its
+`.comment` is 202 B: `QuIC LLVM Hexagon Clang version 8.2.05 (based on LLVM
+5.0.0git-c7d6f70)` with `hexagon-clang-82-326` and `Linker 5.0`.
+
+`[F]` Only `slpi.b04` carries the compressed image: it has 1 `fs:/fastrpc_shell`
+marker, while `adsp.b04` and `cdsp.b05` have **0** each — they reference the
+name but do not embed the deflated payload.
 
 `[I]` So there are **three** delivery shapes for the same artifact: a
 standalone file in a `dsp.img` ext4 tree, a deflate stream embedded in an SDSP
@@ -299,8 +315,8 @@ images. Whichever shape a device dump yields, the census's `modem/image` path is
 a statement about which partition the extraction came from, not about where the
 loader looks.
 
-`[F]` The standalone copies in `dsp.img` are 4 KiB-aligned and byte-identical to
-the ext4 tree's files:
+`[F]` The standalone copies in `dsp.img` (67,108,864 B, ext4, label `dsp`) are
+4 KiB-aligned and byte-identical to the ext4 tree's files:
 
 | file | size | in `dsp.img` at | aligned | identical |
 |---|---:|---|---|---|
@@ -339,7 +355,7 @@ the ext4 tree's files:
 program header table starts immediately after the 52-byte ELF32 header. It is
 **not** `e_ehsize + e_phnum × e_phentsize` (148 with 3 phdrs, 180 with 4).
 The `b00 == e_ehsize + e_phnum × e_phentsize` law documented in
-`research/fleet/other-misc.md` §1 for `.mdt` containers has **no meaning
+`research/fleet/other-misc.md` §3.2 for `.mdt` containers has **no meaning
 here** — that law describes a split container whose first part holds the header
 *and* the phdr table, whereas this is one monolithic ELF. It is not applied
 and not claimed.
@@ -354,13 +370,13 @@ defines `EF_HEXAGON_ISA_V66 = 0x00000066`, `EF_HEXAGON_ISA_V73 = 0x00000073`,
 and `EF_HEXAGON_ISA` as bits[11:0]. So `0x66` = **V66** on 10 builds and `0x73`
 = **V73** on 3, and the tiny-core flag (bit 15) is clear on all 13.
 
-`[F]` `phnum` is 3 on the nine V66 builds and 4 on the three V73 builds. The
-fourth, on the V73 set, is `PT_TLS` (type 4, `filesz` 0, `memsz` 8, flags 4).
-So program-header count is a **generation** marker: V66 → 3, V73 → 4.
+`[F]` `phnum` is 3 on the ten V66 builds and 4 on the three V73 builds. The
+fourth, on the V73 set, is `PT_TLS` (type **7**, `filesz` 0, `memsz` 8, flags 4,
+align 8). So program-header count is a **generation** marker: V66 → 3, V73 → 4.
 
 `[F]` `shnum` is **build-dependent, not domain-dependent**: 25 on all four
 instantnoodle builds regardless of domain, 28 on both fp6 CDSP builds, 29 on
-the fp6 ADSP build, 24 on all five KODIAK builds. Any claim that section count
+the fp6 ADSP build, 24 on all six KODIAK builds. Any claim that section count
 tracks the domain is false.
 
 ### 3.2 Program headers
@@ -422,11 +438,11 @@ largest *stored* data structures after `.text` are `.symtab` (64,288) and
 `.strtab` (56,596), so roughly 14% of the artifact is symbol and string
 metadata — a debug-friendly build, not a stripped one.
 
-`[F]` On fp6 the same read gives `.text` 703,000 = **57.65%**, and three extra
-sections appear: `.rela.plt` (12), `.plt` (64), `.tbss` (4), plus two
-annotations — `.note.llvm.cgmdinfo` (90,126 B) and `.note.qc.cov` (8,017 B).
-`[I]` Code-coverage and call-graph metadata shipped inside the image, which is
-a development-build signature.
+`[F]` On fp6 the same read gives `.text` 703,000 = **57.65%**, and five sections
+appear that dragon does not have: `.rela.plt` (12), `.plt` (64), `.tbss` (4),
+plus two annotations — `.note.llvm.cgmdinfo` (90,126 B) and `.note.qc.cov`
+(8,017 B). `[I]` Code-coverage and call-graph metadata shipped inside the
+image, which is a development-build signature.
 
 ### 3.4 What the bytes say about themselves
 
@@ -443,8 +459,10 @@ a development-build signature.
 
 `[F]` The engineering-release line gives the exact compiler build:
 `hexagon-clang-84-5479` for the KODIAK builds, `hexagon-clang-83-4733` for
-instantnoodle. The fp6 `.comment` is 40× larger because it is a release build
-with the full annotation block, including link command lines
+instantnoodle, `hexagon-clang-87-6198` for fp6 ADSP, `hexagon-clang-86-7585`
+for fp6 CDSP. The fp6 `.comment` is ~40× larger than the KODIAK one (8,817 vs
+225) because it is a release build carrying the full annotation block,
+including link command lines
 (`/pkg/qct/software/hexagon/releases/tools/8.6.04/Tools/bin/hexagon-link
 -mv73 -g -E -nostdlib …`). `[F]` That `-mv73` independently corroborates the
 `e_flags` V73 decode from a different field of the same file.
@@ -454,8 +472,8 @@ release: `ADSP.HT.5.5.c9-00028-KODIAK-2_20250819_030546` (dragon),
 `ADSP.HT.5.5.c8-00149-KODIAK-1_20240603_025047` (rb3-00149),
 `ADSP.HT.5.5.c8-00246-KODIAK-1_20251211_183427` (rb3-00246),
 `ADSP.HT.5.3-00614-SM8250-1_20210822_233012` (instantnoodle adsp),
-`CDSP.HT.2.3-00602-SM8250-1.551792.1.5` (instantnoodle cdsp),
-`CDSP.HT.3.0-00953-LANAI-1_20250603_02…` (fp6 cdsp),
+`CDSP.HT.2.3-00602-SM8250-1.551792.1.592645.1_20230612_043821` (instantnoodle
+cdsp), `CDSP.HT.3.0-00953-LANAI-1_20250603_024407` (fp6 cdsp),
 `LPAIDSP.HT.1.0-01111-LANAI-1_20250717_022841` (fp6 adsp).
 
 `[F]` That last one is worth a line: **fp6's ADSP shell is tagged `LPAIDSP`**,
@@ -470,19 +488,19 @@ and its filename says `_0`. Three naming schemes for one domain, and only the
 | dragon-q6a | 297 | 217 | 789 | 29 | 2 | **0** |
 | rb3-00149 | 301 | 217 | 792 | 29 | 2 | **0** |
 | inst adsp | 388 | 218 | 1,036 | 48 | 3 | **0** |
-| fp6 adsp | 529 | 427 | 1,201 | 109 | 96 | **0** |
+| fp6 adsp | 529 | 427 | 1,201 | 103 | 96 | **0** |
 
-`[F]` `QDSP6` never appears as a string (0 of 4) even though `e_machine` is 164
-(`EM_QDSP6`) — the identifier lives only in the header field. `[F]` The exact
-literal `fastrpc_shell_0` occurs **once** in dragon-q6a, at offset `0xa0371`,
-preceded by `Kernel received an floating point error` and followed by
-`Unknown` / `exception_killer` / `fastrpc_exception` / `listener` /
+`[F]` `QDSP6` never appears as a string (0 of 4 builds) even though `e_machine`
+is 164 (`EM_QDSP6`) — the identifier lives only in the header field. `[F]` The
+exact literal `fastrpc_shell_0` occurs **once** in dragon-q6a, at offset
+`0xa0371`, preceded by `Kernel received an floating point error` and followed
+by `Unknown` / `exception_killer` / `fastrpc_exception` / `listener` /
 `listener_hexagon.c` — i.e. it is a *runtime label* the shell prints in its
 listener diagnostics, not a path it is loaded from.
 
 `[F]` No build contains a `FASTRPC_SHELL_UNSIGNED_NAME` macro expansion
-(0 of 5 checked) — that token exists in the modem firmware's loader strings
-(§2.3) but not in the shell ELF.
+(0 of 5 builds checked, and `FASTRPC_SHELL_NAME` is likewise 0) — those tokens
+belong to the modem firmware's loader strings (§2.3), not to the shell ELF.
 
 ### 3.5 Entropy and repetition
 
@@ -491,15 +509,16 @@ listener diagnostics, not a path it is loaded from.
 | build | size | entropy | zlib-9 | ratio | 16 B blocks | distinct | extra dups | max count |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | dragon-q6a | 841,072 | 6.6649 | 417,598 | 49.65% | 52,567 | 49,008 | 3,559 | 376 |
-| rb3-00149 | 845,584 | 6.6682 | 420,503 | 49.73% | 52,848 | 49,270 | 3,578 | 376 |
-| inst adsp | 908,340 | 6.5459 | 432,101 | 47.57% | 56,771 | 53,212 | 3,559 | 376 |
+| rb3-00149 | 845,584 | 6.6682 | 420,503 | 49.73% | 52,849 | 49,306 | 3,543 | 333 |
+| inst adsp | 908,340 | 6.5459 | 432,101 | 47.57% | 56,771 | 53,166 | 3,605 | 423 |
 
-`[F]` ~6.6 bits/byte and a 50% deflate ratio is what `.text` looks like. The
-3,559 duplicate 16-byte blocks with a max count of 376 are the all-zero block
-(the `.bss`/padding region), not a cipher signature — contrast
-`research/fleet/other-sensors.md` §3.1, where 46,718–55,362 duplicates against
-a ~1.7×10⁻²⁷ birthday expectation proved ECB. Here the count is ordinary
-zero-fill.
+`[F]` ~6.6 bits/byte and a ~50% deflate ratio is what `.text` looks like. In all
+three builds the most common 16-byte block is the all-zero block
+(`00000000000000000000000000000000`), recurring 333–423 times — ordinary
+`.bss`/padding zero-fill, not a cipher signature. Contrast
+`research/fleet/other-sensors.md` §3.1, where 46,718–55,362 duplicate blocks
+against a ~1.7×10⁻²⁷ birthday expectation proved ECB. Here the duplicate count
+is 6.4–6.8% of blocks and is driven by one zero value.
 
 `[F]` Each build contains exactly **two** `\x7fELF` occurrences: the real header
 at 0, and one at a mid-file offset that is the loader's compare constant
@@ -533,12 +552,13 @@ fails at 2 of the 3 sizes this family exhibits in public.
 md5 `1afb6774c8caba405aa158cc943904be` vs `9272f230966161b36597bde3ee0a7da1`,
 and **280,727 bytes differ (33.20%)**, first at offset `0x44`. Two builds a
 third of a megabyte apart in content, identical in length, differing from
-inside the ELF header onward. Section-level: `.text` (513,464 B) is **not**
-identical, `.rodata` is **not** identical, `.dynstr` **is** identical
-(22,423 B), `.strtab` **is** identical (56,825 B) — so the symbol and string
-names are shared while the code is not. `[I]` Same source tree, same symbol
-namespace, different compile — consistent with two builds of one release train
-four revisions apart.
+inside the ELF header onward. Section-level: `.text` (513,464 vs 513,496 B) is
+**not** identical, `.rodata` (89,647 vs 89,727) is **not** identical, `.dynstr`
+**is** identical (22,423 B both), `.strtab` **is** identical (56,825 B both),
+and `.symtab` is **not** identical despite equal size — so the string names are
+shared while the code and the symbol values are not. `[I]` Same source tree,
+same string namespace, different compile — consistent with two builds of one
+release train four revisions apart.
 
 `[F]` Case 3 splits into two very different distances, which is itself
 informative:
@@ -554,11 +574,15 @@ size and still carry different md5s — a 739-byte delta. That is the finest
 same-size difference in the set and the clearest demonstration that md5, not
 size, is the build identity.
 
-`[F]` Across a size *change*, the distance is also small: 845,584 → 845,632 is
-+48 B, and only **four** sections change size — `.text` +320, `.rodata` +184,
-`.symtab` +16, `.strtab` +33. Everything else shifts by exactly the inserted
-bytes and keeps its length. `[I]` One function and its strings grew; the rest
-of the image is the same build.
+`[F]` Across a size *change*, the arithmetic also does not reduce to "inserted
+bytes": 845,584 → 845,632 is only **+48 B** on disk, while four sections grow a
+combined **553 B** — `.text` +320, `.rodata` +184, `.symtab` +16, `.strtab`
++33. The rest is released inter-section padding, not new content: `.eh_frame`'s
+gap to `.dynamic` shrinks from 740 B to 228 B (**−512**), the gap after
+`.rodata` grows 8 B (**+8**), and the trailing gap to `e_shoff` drops 1 B. So
+`553 − 504 − 1 = 48`, exactly the file delta. `[I]` One function and its
+strings grew; the rest of the image is the same build, and the file got smaller
+than the code did because alignment slack was consumed.
 
 ### 4.2 The prior-art case, and a correction `[F]`
 
@@ -584,14 +608,14 @@ than fit a single value:
 | `dsp-adsp/flac_dec_module.so.1` | 41,688 | `126adca960f9a3f3` | `2b83d12f21693566` | `126adca960f9a3f3` | **sha256** |
 
 `[F]` So the fp6 on-disk copy **is** the payload `census.md` describes — same
-size, and the 16-byte value matches the column exactly, 3 of 3 for this
-filename. A working note earlier in this session compared that value against a
-computed **md5**, found no match, and inferred a mismatch; that inference is
-**withdrawn**. It was a column-semantics error, not a data discrepancy.
+size, and the 16-byte value matches the column exactly, 5 of 5 including three
+`fastrpc_shell` rows. A working note earlier in this session compared that
+value against a computed **md5**, found no match, and inferred a mismatch; that
+inference is **withdrawn**. It was a column-semantics error, not a data
+discrepancy.
 
-`[F]` What survives from that line is weaker but still true and still worth
-recording: `census.md` prints only **16 hex characters (8 bytes)** of the
-sha256, both for the fp6 tree and throughout. Two distinct payloads collide in
+`[F]` What survives is weaker but still worth recording: `census.md` prints only
+**16 hex characters (8 bytes)** of the sha256. Two distinct payloads collide in
 8 bytes with probability ~2⁻⁶⁴ per pair, so a prefix match is strong evidence
 but not proof, and no row in that table can be *disproved* by prefix
 comparison. That limit is a property of the table, not of this artifact.
@@ -666,26 +690,32 @@ agree through the header by construction.
 | `.strtab` | STRTAB | 72,585 | 72,204 | −381 |
 
 `[F]` On instantnoodle the same test gives 12 of 25 sections differing,
-`.text` −1,832, `.bss` **+1,043,592**, `.rodata` −1,344, `.data` −1,032.
+`.text` −1,832, `.rodata` −1,344, `.data` −1,032, `.got` −16, and `.bss`
+**+1,043,592**.
 
-`[F]` A `.bss` that **grows** by 1.25 MiB while `.text` **shrinks** is not a
-signature removal in either direction. `[F]` The section-name lists are
-identical (28 of 28 names match on fp6) and `e_entry` is unchanged (`0xb4` on
-both), so the two are the same program linked twice.
+`[F]` A `.bss` that **grows** by ~1.25 MiB while `.text` **shrinks** is not a
+signature removal in either direction — and a NOBITS section occupies no file
+bytes, so it cannot explain the size delta either. `[F]` The section-name lists
+are identical (28 of 28 names match on fp6, 25 of 25 on instantnoodle) and
+`e_entry` is unchanged (`0xb4` on fp6, `0x94` on instantnoodle), so the two are
+the same program linked twice.
 
-`[F]` The evidence of *why* is in the strings. The `_unsigned` build's
-`.comment` carries the link command line and the object paths that produced it,
-and they name a **different build directory**: `unsigned_img/qdsp6/milos.cdsp.prod/`
-and `unsigned_img/build/milos.cdsp.prod/fastrpc_shell_unsigned_3.elf.map`, with
-61 occurrences of `unsigned_img`. The signed build names `signed_img/…`, also 61
-occurrences. Two link invocations from two trees, one per variant.
+`[F]` The evidence of *where* they were built is in the strings, and it is
+one-directional: the `_unsigned` build carries **61** whole-file references to
+`fastrpc_shell_unsigned_img/` (**43** of them inside `.comment`, e.g.
+`…/config/bsp/fastrpc_shell_unsigned_img/qdsp6/milos.cdsp.prod/apps_mem_stub.c`)
+and **zero** to `fastrpc_shell_img/`. The signed build is the mirror: **61**
+references to `fastrpc_shell_img/` and **zero** to `unsigned_img`. Two link
+trees, one per variant, both under the same
+`CDSP.HT.3.0-00953-LANAI-1_20250603_024407` release tag.
 
-`[F]` And the arithmetic corroborates: the extra `.bss` in the unsigned build
-is the heap the unsigned PD is given, and `adsp_proc/platform/fastrpc_heap/` is
-in the unsigned build's own source list. `[I]` The unsigned variant is linked
-with a larger static heap because it cannot allocate the same way inside the
-signed PD's memory envelope. That is a plausible reading of the numbers; the
-numbers themselves do not name it.
+`[F]` The obvious explanation for the extra `.bss` — that the unsigned variant
+links a different heap — does **not** survive the strings: both builds name
+`cdsp_proc/platform/fastrpc_heap/src` **16 times each**, and both carry the same
+`hexagon-link -mv73` invocation with the same `libc.a`/`libgcc.a` inputs. `[U]`
+So the +1.31 MB of static storage is a source-level difference between the two
+`milos.cdsp.prod` trees, not a different library set, and which source files
+differ cannot be read from the ELF.
 
 **Verdict `[N]`:** `_unsigned` is not `signed` minus a signature — the two
 differ from ELF-header offset 32 onward and 9 of 28 (fp6) / 12 of 25
@@ -701,9 +731,11 @@ relationship between the pair is **not** a truncation and **not** a suffix;
 ### 6.1 The name is wrong on both tokens `[F]`
 
 `[F]` **Not `gpu`.** The corpus has a `gpu` family. In `modem/image` it is
-**276 rows**, and all of them are `fpctzapp.bNN` — trust-zone applications. No
-row in the corpus has a `gpu`-family filename anywhere near `fastrpc`. The
-shell is not a GPU artifact; it is the Hexagon DSP's user-PD loader image.
+**276 rows** with a blank subfamily, and the names are trust-zone and GMU
+artifacts — `fpctzapp.*` 108, `egtzappf.*` 72, `a610_zap.*` 44, `a615_zap.*` 28,
+`a660_zap.*` 12, `a740_zap.*` 4, `a660_gmu.*` 3, `a660_sqe.*` 3, `a740_sqe.*` 1,
+`gmu_gen70200.*` 1. **Zero** of those 276 rows contain `fastrpc`. The shell is
+not a GPU artifact; it is the Hexagon DSP's user-PD loader image.
 
 `[F]` **Not `compute`.** The corpus has a compute label, `db_type=COMPUTE`, on
 **880 rows across 63 devices / 280,601,355 B**. Every one of those 880 rows is
@@ -748,11 +780,11 @@ change, not a `research/` change, and this issue's scope is documentation.
 `[F]` Every one of the 13 same-family builds is **ELF32** (`EI_CLASS=1`),
 `e_machine=164`, `e_type=3`. The matrix types all 3 rows `ELF64`.
 
-`[F]` The honest framing: the two available `gpu-compute`-filename builds (and
-eleven more of the same family) are ELF32 `e_machine=164`; the matrix types all
-3 rows `ELF64`; **whether the three census builds are ELF32 is `[U]`** because no
-census payload was obtainable — but the `ELF64` label is at minimum unverified
-and inconsistent with **13 of 13** same-family builds measured.
+`[F]` The honest framing: 13 same-family builds are ELF32 `e_machine=164`; the
+matrix types all 3 rows `ELF64`; **whether the three census builds are ELF32 is
+`[U]`** because no census payload was obtainable — but the `ELF64` label is at
+minimum unverified and inconsistent with **13 of 13** same-family builds
+measured.
 
 `[F]` This is the third instance of the same labelling defect in this repo, and
 the pattern is now well established:
@@ -771,16 +803,17 @@ default for "some kind of ELF container", not as a parsed value, and a row that
 is genuinely ELF32 inherits it silently.
 
 `[F]` For context, `ELF64` is *not* wrong everywhere: 36 rows do carry an ISA
-string, including 25 `AArch64`, 4 `QDSP6 / Hexagon`, and RV32 entries. The
-label is correct where it was checked and a default where it was not.
+string — **27 mention `AArch64`**, **4 are `QDSP6 / Hexagon`**, and the
+remaining **5** are RISC-V/RV32 or hybrid annotations. The label is correct
+where it was checked and a default where it was not.
 
 ### 7.2 `isa_identified` is blank on 3 of 3 rows `[F]`
 
 `[F]` The ISA is not merely inferable, it is **in the header**: `e_machine=164`
-(`EM_QDSP6`, glibc `elf.h` line 298 `#define EM_QDSP6 164 /* QUALCOMM DSP6 */`)
-plus `e_flags` bits[11:0] giving the Hexagon generation. On the measured
-builds that resolves to V66 or V73. Three rows carry a blank where a
-two-field read would fill it.
+(`EM_QDSP6`, glibc `elf.h` `#define EM_QDSP6 164 /* QUALCOMM DSP6 */`) plus
+`e_flags` bits[11:0] giving the Hexagon generation. On the measured builds that
+resolves to V66 or V73. Three rows carry a blank where a two-field read would
+fill it.
 
 `[U]` The census builds' `e_flags` cannot be read without their payloads, so
 their ISA *version* is unknown — but their `e_machine` almost certainly 164,
@@ -805,10 +838,10 @@ mainline.
 `[F]` One more negative worth recording, because it is the natural next
 question: `linux-firmware`'s `WHENCE` (542,288 B, 11,954 lines) has **0**
 `fastrpc` hits and **0** `shell` hits, while `adsp` appears **133** times. The
-shell is not a linux-firmware blob; it ships in the vendor's `hexagon-dsp-binaries`
-side repository instead, whose README says exactly that: linux-firmware carries
-the DSP firmware, and the FastRPC shell and skeletons are "additional set of
-binaries to be executed on the DSP side".
+shell is not a linux-firmware blob; it ships in the vendor's
+`hexagon-dsp-binaries` side repository instead, whose README says exactly that:
+linux-firmware carries the DSP firmware, and the FastRPC shell and skeletons are
+"additional set of binaries to be executed on the DSP side".
 
 ---
 
@@ -839,9 +872,10 @@ What is genuinely new here:
 - `e_flags` is decoded as the Hexagon ISA version, independently corroborated by
   the `-mv73` in a link command line (§3.4);
 - `_unsigned` is shown **not** to be a stripped copy, with section-level deltas,
-  and the two variants are traced to two separate `signed_img/`/`unsigned_img/`
-  link trees (§5);
-- the size↔build failure is demonstrated three ways, two of them on bytes (§4);
+  and the two variants are traced to two separate
+  `fastrpc_shell_img/`/`fastrpc_shell_unsigned_img/` link trees (§5);
+- the size↔build failure is demonstrated three ways, two of them on bytes, with
+  the padding accounting for the one size *decrease* in code-to-file growth (§4);
 - the `gpu-compute` label is shown to collide with the corpus's real `COMPUTE`
   bucket, which is the CDSP PIL image set on 880 rows (§6.1);
 - three delivery shapes for one artifact are measured — standalone ext4 file,
@@ -863,25 +897,24 @@ What is genuinely new here:
   `me-cafebabe-backyard/android-firmware-qti-sdm660`) — build-tree intermediates
   for a different SoC. `fastrpc_shell_0 dubai` → 0; `fastrpc_shell_0 Spacewar` → 0.
 - **The vendor trees carry the partition, not the file.** All three
-  `proprietary-files.txt`-equivalent manifests
-  (`dubai`/`Spacewar`/`FP5` `*-vendor.mk`) reference only
+  `*-vendor.mk` manifests (`dubai`/`Spacewar`/`FP5`) reference only
   `vendor/lib{,64}/libsns_fastRPC_util.so`; `radio/modem.img` is a **Git LFS
   pointer** in all three (sizes 136,769,708 / 180,908,032 / 190,541,824 B), and
   the LFS object is not retrievable — the batch API returns
   `404 Object does not exist on the server` for FP5's
   `a4b947bcbc0ad843b68f2b5040b1722a4554a0e3ff5eb089dc2a141505da120c`.
 - **`fastrpc_shell_0` is not a filesystem path in any of them.** In the FAT16
-  `instantnoodle` `modem.img` there is no `fastrpc`-named file entry in `/image/`
-  at all; the name exists only as a **string inside** `adsp.b04` / `cdsp.b05` /
-  `slpi.b04` and as a `/statichashes/` reference. Where the shell lives on a
-  shipped device — `/vendor/dsp/` per Check Point — is a runtime path the census
-  does not see.
+  `instantnoodle` `modem.img` there is no `fastrpc`-named file entry at all; the
+  name exists only as a **string inside** `adsp.b04` / `cdsp.b05` / `slpi.b04`
+  and as a `/statichashes/` reference. Where the shell lives on a shipped device
+  — `/vendor/dsp/` per Check Point — is a runtime path the census does not see.
 - **No `.mdt` relation.** The shell is not a PIL image and does not participate
   in the `b00`/`mdt` container at all (§3.1). Nothing here re-derives
   `other-misc.md`'s `b00` law.
 - **`_unsigned` vs `signed`: relationship `[N]`, purpose `[U]`.** Not a
-  truncation, not a suffix — proven. *Why* two variants ship, and what the
-  extra 1.25 MiB of `.bss` is for, is not established from bytes.
+  truncation, not a suffix — proven. *Why* two variants ship, and what the extra
+  ~1.25 MiB of `.bss` is for, is not established from bytes; both link the same
+  `fastrpc_heap` source 16 times each, so the heap-source explanation fails.
 - **The 3 census builds' `e_flags`, `phnum`, `shnum` and ISA version are `[U]`.**
   13 builds give a strong prior (V66 or V73, 3 or 4 phdrs, 24–29 sections) but
   the three rows themselves were never opened.
@@ -891,6 +924,11 @@ What is genuinely new here:
 - **FP5's 841,096 B does not exist publicly.** 0 entries at that size for
   `fastrpc_shell_0` and 0 for any basename in the 2,501-entry tree. Its 24-byte
   excess over Edge_30 is unexplained.
+- **GitHub code-search counts could not be re-issued this session.** The
+  unauthenticated REST endpoint returns `Requires authentication`, and the web
+  endpoint returned HTTP 429. The hit counts in §10 are the values recorded
+  earlier in this session against the same query strings and are cited as such,
+  not re-measured at write time.
 
 ---
 
@@ -966,9 +1004,10 @@ characterisation and the label defect.
 2. **Resolve suffixes 5 and 6.** The driver defines 0–4; the public tree ships
    5 and 6 including unsigned variants. Newer SoCs, or non-upstream numbering?
 3. **Explain the `.bss` growth in `_unsigned`** (+1,310,744 B / +1,043,592 B) —
-   plausible as a static heap for the unsigned PD, unproven from bytes.
+   the `fastrpc_heap` source is present in both builds, so the difference is in
+   the `milos.cdsp.prod` tree itself; unproven from bytes.
 4. **Decode the `.note.llvm.cgmdinfo` / `.note.qc.cov` sections** (90,126 /
-   8,017 B on fp6). They are named for call-graph and coverage data; their
+   8,017 B on fp6 adsp). They are named for call-graph and coverage data; their
    schema is unexamined.
 5. **Establish whether `LPAIDSP` is a distinct domain.** fp6's ADSP shell is
    tagged `LPAIDSP.HT.1.0` while its directory says `adsp` and its suffix says
@@ -1015,6 +1054,10 @@ len(d) - (shoff + sn * se)                                           # -> 0 on 1
 # size-vs-build trap, measured on bytes
 sum(1 for i in range(n) if a[i] != b[i])                              # 845,584 pair -> 280727 (33.20%)
                                                                      # 845,632 pair -> 83506 / 739
+
+# 845,584 -> 845,632: section growth 553, file 48, released padding 504 (+1 trailing)
+sum(s[5] for s in secs_b if s[1] != 8) - sum(s[5] for s in secs_a if s[1] != 8)   # -> 553
+len(b) - len(a)                                                                   # -> 48
 
 # _unsigned is not a stripped copy
 next(i for i in range(n) if s[i] != u[i])                            # -> 32 on both devices
