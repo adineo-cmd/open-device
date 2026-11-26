@@ -673,6 +673,18 @@ md5-level claim is build-specific.
 | FIRMWARE10 | 8 |
 | FIRMWARE5 | 3 |
 
+Two of those labels are the same family of files. All **11** `anc*` rows in the
+camera bucket are camera userspace tuning models, and they are split across two
+`db_type`s: the 3 `FIRMWARE5` rows are `anc.bin`, and the 8 `TOUCHSCREEN` rows are
+its siblings (`anc_front.bin`, `anc_main.bin`, `anc_wide.bin`, `anc_1080p.bin`,
+`anc_4k.bin`, `anc_cn.bin`, `anc_eu.bin`, `anc_ob_mask_1352_2400.bin`). On FP5
+`anc.bin`, `anc_front.bin` and `anc_wide.bin` are one byte-identical payload under
+three names with two different labels. Neither `FIRMWARE5` nor `TOUCHSCREEN` names
+a loader: `anc.bin` sits at `vendor/etc/camera/`, which is not on the kernel's
+`/lib/firmware` search path, and no mainline `camss` file calls
+`request_firmware()`. Contract and evidence in `research/drivers/firmware5.md`
+(#883).
+
 28 of the 29 `ELF64` rows are `CAMERA_ICP.mdt` (the 29th is `CAMERA_ICP.b00`, also
 ELF32). All 28 are ELF**32**:
 
