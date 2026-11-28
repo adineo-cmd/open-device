@@ -395,3 +395,22 @@ for d in ['cheeseburger','dumpling','sagit','chiron','mata','joan','htc_ocmdtwl'
           'lilac','maple','poplar','novago','pro1','envy-x2','miix-630']:
     print(' ',d,len([x for x in r if x['device'].lower()==d]))"
 ```
+
+## 8. Byte-level container spec and parser (issue #829)
+
+This README answers "how do I replace or interoperate with the blob" at the
+layer level. The complementary question — "what are the bytes, across devices" —
+is answered in two artifacts added under issue #829:
+
+- `research/fleet/boot-family-spec.md` — one label, four container grammars
+  (`ANDROID!` v0–v4, `dt_table`, ELF32/64 including the multi-ELF `xbl`, and
+  AVB `AVB0`/`AVBf`), all 26 basenames mapped, both AVB verification laws
+  reproduced byte-exactly on a real 8 MiB `dtbo` payload, and the corpus
+  defects quantified (73 rows tagged `db_type=BOOT` that are not boot images;
+  118 of 125 `boot.img` rows MiB-quantized).
+- `implementations/boot/bootimg_parser.py` — a stdlib-only parser covering all
+  four grammars, with `test_bootimg_parser.py` (67 tests) and deterministic
+  synthetic fixtures from `make_fixture.py`. No payload is committed.
+
+That note is a **synthesis over public specs** (AOSP `bootimg.h`, `avbtool.py`,
+`mkdtimg`), not a new format discovery; it says so in its own Gate 0 section.
