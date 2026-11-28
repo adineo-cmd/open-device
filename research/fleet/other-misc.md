@@ -267,6 +267,17 @@ documented in `research/qualcomm/docs/trustzone-census.md` and
 `research/fleet/other-fingerprint.md`. **Both are prior art here; what is new is the statement
 that they share an extension and that the extension does not determine the class.**
 
+**Why the matrix cannot tell them apart, and it is not carelessness.** The `ELF64` label is a
+4-byte prefix test, not a class read: `librephone/device_files.py:222` holds
+`("ELF64", bytes([0x7F, 0x45, 0x4C, 0x46]))`, matched by `header.startswith(num)` over an
+8-byte read at line 422 — and `\x7FELF` opens ELF32 and ELF64 alike, with the class byte
+`e_ident[EI_CLASS]` at offset 4 never inspected. `librephone/typedefs.py` `Bintypes` has
+`ELF64` and **no `ELF32`**, so every 32-bit ELF in the corpus has exactly one reachable label.
+The collapse is structural. Across the whole `db_type` that is 3,284 rows over 6
+`blob_family` values, of which **809 (24.6%) are not ELF files at all** — 743 `.bNN` payload
+segments and 66 `.sig` signatures — and **227 of 725 `.b00` headers are ELF32-shaped** by this
+note's own `52+32N` / `64+56N` law. See `research/drivers/elf64.md`.
+
 By stem, the ELF64 TAs verifiable on disk are: `05B04A44-…`, `32552B22-…`, `FD719D50-…`,
 `evautil64`, `featenabler`, `focal64`, `hdcp1`, `hdcp2p2`, `hdcpsrm`, `ic5`, `loadalgota64`,
 `ops`, `smplap64`, `soter64`, `sp_license`, `winsecap`, plus the eight-part set of §3.4. Only
