@@ -44,7 +44,7 @@ work committed, a named delta remains; **NEW** = no committed deliverable.
 | modem | `research/laptop/qualcomm-pil-manifest-family.md`, `research/fleet/pil-metadata-sweep.md`, `research/fleet/qdsp6sw-container.md`; parsers `implementations/pil-manifests/` (41 tests), `implementations/hexagon-qdsp6/` (47 tests) | PARTIAL | `qdsp6sw.mbn` (84,123,868 B) container + metadata + embedded QuRT XML decoded; CLADE payload bytes, `.clade.dict`/`.clade.comp` offsets, per-segment instruction decode still open |
 | other | `research/laptop/qualcomm-data-blob-fleet.md` (hrtf5c, dax_param); parser `implementations/data-blob-fleet/` (54 tests) | PARTIAL | rest of the "other" bucket |
 | tz | `research/fleet/dsp-tz-map.md` (QSEE ELF64 segment map, enchilada), `research/qualcomm/docs/trustzone-census.md` (FP6) | PARTIAL | cross-device spec, signature, `seg[10]` entropy 6.64 question |
-| wifi | `research/fleet/bdwlan-format.md` (container RESOLVED, 34-file IE map, record structure); `research/fleet/wifi-wpss.md` (5,198 rows / 73 devices, `b<NN>`≡phdr NN law, `bdwlan` `b`↔`e` wrapper grammar) | PARTIAL | no stdlib parser; per-device TLV coverage - `bdwlan-format.md` resolves tags 1..17 on the 19 KiB generation only, tags 18..33 of the 58 KiB generation remain open |
+| wifi | `research/fleet/wifi-family-spec.md` (one family, three grammars; 5,642 rows / 714,009,036 B; the `bdwlan` board-data container 5,120 rows / 73 devices spec'd byte-level; tag table 1..36 measured on 170 real bodies with tags 1..31 length-stable across both ath11k generations; `0x0a` XOR checksum 170/170; `u16@8` corrected to declared-chain-length), `research/fleet/bdwlan-format.md` (container RESOLVED, 34-file IE map), `research/fleet/wifi-wpss.md` (5,198 rows / 73 devices); parser `implementations/wifi/` (49 tests) | PARTIAL | 522 rows / 48 basenames outside `bdwlan` (`amss20.bin` 276,853,024 B is 38.77% of family bytes); tag semantics unknown; `u16@8`=28,216 unexplained; no corpus payload opened |
 
 ## Firmware fleet — per family
 
@@ -58,7 +58,7 @@ work committed, a named delta remains; **NEW** = no committed deliverable.
 | modem | `research/fleet/pil-metadata-sweep.md` (SDM845 + SM8250), `research/fleet/qdsp6sw-container.md` (SM8250/SDX55M), `research/laptop/qualcomm-pil-manifest-family.md`; parser `implementations/hexagon-qdsp6/` | PARTIAL | CLADE payload decode, cross-device `qdsp6sw.mbn` |
 | other | `research/laptop/qualcomm-data-blob-fleet.md` (2 blobs) | PARTIAL | rest |
 | tz | `research/fleet/dsp-tz-map.md`, `research/fleet/qsee-crossgen.md` (SDM845 vs SM8250) | PARTIAL | cross-device |
-| wifi | `research/fleet/bdwlan-format.md` (enchilada); `research/fleet/wifi-wpss.md` (fleet census) | PARTIAL | cross-device beyond the 73 `wpss` devices |
+| wifi | `research/fleet/wifi-family-spec.md` (cross-device, `bdwlan` container + tag table), `research/fleet/bdwlan-format.md` (enchilada); parser `implementations/wifi/` | PARTIAL | 522 non-`bdwlan` rows; tag semantics |
 
 ## Deep RE — per issue
 

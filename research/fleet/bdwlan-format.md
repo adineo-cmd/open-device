@@ -52,8 +52,16 @@ Measured properties:
 - `Σ (4 + len)` over the chain = **19,152** exactly, on every file `[F]`.
 - Tag values are strictly ascending with no duplicates — the tag is an
   enumeration (section/parameter ID), not a stream type marker `[I]`.
-- Inside the first IE payload, a u16 LE at absolute offset [8,10) equals
-  **19152** — the total file size self-reference, present in all 35 files `[F]`.
+- Inside the first IE payload, a u16 LE at absolute offset [8,10) is the
+  **declared TLV chain length**. On these 35 files it equals **19152** because
+  the chain fills the body exactly, which is why it was previously read as a
+  file-size self-reference; that reading does not generalise. Measured on 170
+  board bodies across three chipset generations (`wifi-family-spec.md` §6),
+  the field tracks the *chain* length, not the file length: on a body that is
+  zero-extended past its chain the two values separate (26,328 B file,
+  19,152 B declared, 7,176 B trailing zeros), and on the 58 KiB ath11k
+  generation the field is 28,216 on all 134 bodies while the body is 58,180.
+  So "equals 19152" is `[F]` on this file set and "is the file size" is `[N]`.
 - No nested TLV evidence: the only payloads that parse as nested `{u16,u16}`
   chains are all-zero payloads (an artifact: zero-filled space parses as an
   infinite `(0,0)` TLV chain). Content-bearing payloads do **not** parse as
@@ -70,7 +78,7 @@ driver, parses this TLV stream `[H]`.
 
 | tag | len | abs span [header start, IE end) | entropy (bits/B, `bin`) | var offsets | var spans | classification |
 |---|---|---|---|---|---|---|
-| 1 | 1028 | [0, 1032) | 0.51 | 98 | 42 | header/config; holds file-size self-ref; **per-board ID fields at abs [10,12) and [408,410)** (§5) |
+| 1 | 1028 | [0, 1032) | 0.51 | 98 | 42 | header/config; holds the declared chain length at abs [8,10) (§2, corrected); **per-board ID fields at abs [10,12) and [408,410)** (§5) |
 | 2 | 292 | [1032, 1328) | 0.43 | 12 | 10 | sparse config |
 | 3 | 484 | [1328, 1816) | 0.00 | 37 | 5 | **optional**: zeroed in 25/35; populated in `b07,b0d,b0e,b14,b15,b30,b31,b32,cxo,qor` |
 | 4 | 1028 | [1816, 2848) | 0.00 | 19 | 11 | mostly zero; populated in 33/35 |
