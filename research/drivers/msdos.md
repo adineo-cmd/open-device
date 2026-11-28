@@ -96,6 +96,14 @@ neighbouring files. `modem.img` is never labelled `MSDOS` anywhere in the
 corpus — 78 rows, all `CELL_WIFI_GPS_BLUETOOTH` [F] — even though it is the
 partition that actually is a FAT volume (§2).
 
+**These five rows are a 5-device slice of a 78-device class.** `modem.img` is
+one filename on 78 devices, and **59 of those 78 also ship `modem.mdt`** — the
+ELF that `request_firmware()` actually opens (`qcom_q6v5_mss.c:2115`,
+`qcom_q6v5_pas.c` ×8 structs). So the contrast in this section is the narrow
+case: here two `radio/` partition images sit side by side with two labels; across
+the fleet the same `modem.img` filename carries 25.28% of the corpus's bytes on
+0.23% of its rows. See `research/drivers/cell_wifi_gps_bluetooth.md`.
+
 ## 2. The mount chain: `modem` is mounted, `core_nhlos` is not
 
 FP4's `init/fstab.default` has exactly one firmware-related vfat mount [F]:
